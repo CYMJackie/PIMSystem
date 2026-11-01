@@ -2,11 +2,11 @@ package model.record;
 
 import model.Record;
 
-public class Note extends Record {
+public class Text extends Record {
     private String text;
 
-    protected Note(int id, String text) {
-        String type = "Note";
+    protected Text(int id, String text) {
+        String type = "Text";
         super(id, type);
         this.text = text;
     }
