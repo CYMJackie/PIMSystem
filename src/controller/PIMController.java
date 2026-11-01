@@ -16,7 +16,7 @@ public class PIMController {
     }
 
     public void initialize() {
-        int function = 0, type = 0;
+        int function, type = 0;
 
         view.initialMessage();
         loop: //label of while loop
@@ -35,6 +35,7 @@ public class PIMController {
 
 
             switch (function) {
+                //Create record
                 case 1 -> {
                     Create create = new Create();
                     create.inputMessage();
@@ -55,12 +56,19 @@ public class PIMController {
                         default -> view.function_ErrorMessage();
                     }
                 }
+                //Modify record
                 case 2 -> {}
+                //Delete record
                 case 3 -> {}
+                //Search record
                 case 4 -> {}
+                //Print record
                 case 5 -> {}
+                //Store record
                 case 6 -> {}
+                //Load record
                 case 7 -> {}
+                //Exit
                 case 8 -> {
                     view.exitMessage();
                     break loop;
