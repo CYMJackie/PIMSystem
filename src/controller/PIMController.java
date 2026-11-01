@@ -1,12 +1,72 @@
 package controller;
 
-import view.View;
+import model.PIRManager;
+import view.PIMView;
+import view.command.Create;
+
+import java.util.Scanner;
 
 public class PIMController {
-    private final View view;
+    private PIMView view;
+    private PIRManager manager;
 
-    public PIMController(View view) {
+    public PIMController(PIRManager manager, PIMView view) {
+        this.manager = manager;
         this.view = view;
     }
 
+    public void initialize() {
+        int function = 0, type = 0;
+
+        view.initialMessage();
+        loop: //label of while loop
+        while (true) {
+            //input request
+            view.inputMessage();
+            Scanner scanner = new Scanner(System.in);
+
+            //Error handling
+            if (scanner.hasNextInt())
+                function = scanner.nextInt();
+            else {
+                view.function_ErrorMessage();
+                continue;
+            }
+
+
+            switch (function) {
+                case 1 -> {
+                    Create create = new Create();
+                    create.inputMessage();
+
+                    //Error handling of whether "type" is integer
+                    if (scanner.hasNextInt())
+                        type = scanner.nextInt();
+
+                    switch (type) {
+                        //Create Text
+                        case 1 -> {}
+                        //Create Task
+                        case 2 -> {}
+                        //Create Event
+                        case 3 -> {}
+                        //Create Contact
+                        case 4 -> {}
+                        default -> view.function_ErrorMessage();
+                    }
+                }
+                case 2 -> {}
+                case 3 -> {}
+                case 4 -> {}
+                case 5 -> {}
+                case 6 -> {}
+                case 7 -> {}
+                case 8 -> {
+                    view.exitMessage();
+                    break loop;
+                }
+                default -> view.function_ErrorMessage();
+            }
+        }
+    }
 }
