@@ -5,7 +5,7 @@ import model.Record;
 public class Text extends Record {
     private String text;
 
-    protected Text(int id, String text) {
+    public Text(int id, String text) {
         String type = "Text";
         super(id, type);
         this.text = text;

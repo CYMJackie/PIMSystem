@@ -1,6 +1,6 @@
 package view.command;
 
-public class Create {
+public class CreateView {
     public void inputMessage() {
         System.out.println("============================================================================================");
         System.out.println("Type of record: ");

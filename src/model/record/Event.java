@@ -7,7 +7,7 @@ public class Event extends Record {
     private String description;
     private LocalDateTime starting, alarm;
 
-    protected Event(int id, String description, LocalDateTime alarm, LocalDateTime starting) {
+    public Event(int id, String description, LocalDateTime alarm, LocalDateTime starting) {
         String type = "Event";
         super(id, type);
         this.description = description;

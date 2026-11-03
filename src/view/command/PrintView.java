@@ -1,4 +1,4 @@
 package view.command;
 
-public class Modify {
+public class PrintView {
 }

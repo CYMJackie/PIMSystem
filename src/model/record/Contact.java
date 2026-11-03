@@ -5,7 +5,7 @@ import model.Record;
 public class Contact extends Record {
     private String name, phone, address;
 
-    protected Contact(int id, String name, String phone, String address) {
+    public Contact(int id, String name, String phone, String address) {
         String type = "Contact";
         super(id, type);
         this.name = name;
