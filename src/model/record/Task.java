@@ -7,7 +7,7 @@ public class Task extends Record {
     private String description;
     private LocalDateTime deadline;
 
-    protected Task(int id, String description, LocalDateTime deadline) {
+    public Task(int id, String description, LocalDateTime deadline) {
         String type = "Task";
         super(id, type);
         this.description = description;
