@@ -2,12 +2,16 @@ package controller;
 
 import model.PIRManager;
 import model.command.CreateContact;
+import model.command.CreateTask;
 import model.command.CreateText;
 import view.PIMView;
 import view.command.CreateContactView;
 import view.command.CreateTextView;
 import view.command.CreateView;
-
+import view.command.CreateTaskView;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class PIMController {
@@ -84,7 +88,7 @@ public class PIMController {
             //Create Text
             case 1 -> createText(scanner);
             //Create Task
-            case 2 -> {}
+            case 2 -> createTask(scanner);
             //Create Event
             case 3 -> {}
             //Create Contact
@@ -113,7 +117,44 @@ public class PIMController {
     }
 
     private void createTask(Scanner scanner) {
+        CreateTaskView taskView = new CreateTaskView();
+        CreateTask create = new CreateTask();
 
+        if (scanner.hasNextLine())
+            scanner.nextLine();
+
+        taskView.inputDescriptionMessage();
+        String description = scanner.nextLine();
+        while (description.isBlank()) {
+            taskView.emptyDescription();
+            description = scanner.nextLine();
+        }
+
+        taskView.inputDeadlineMessage();
+        String deadline = scanner.nextLine();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        while (!isValidDeadline(deadline, formatter)) {
+            taskView.emptyDeadline();
+            deadline = scanner.nextLine();
+        }
+
+        LocalDateTime parsedDeadline = LocalDateTime.parse(deadline, formatter);
+        create.createTask(manager, description, parsedDeadline);
+        taskView.success();
+    }
+
+    private boolean isValidDeadline(String str, DateTimeFormatter formatter) {
+        if (str == null || str.isBlank()) {
+            return false;
+        }
+        try {
+            LocalDateTime.parse(str, formatter);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
     }
 
     private void createEvent(Scanner scanner) {
