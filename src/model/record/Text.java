@@ -6,8 +6,7 @@ public class Text extends Record {
     private String text;
 
     public Text(int id, String text) {
-        String type = "Text";
-        super(id, type);
+        super(id, "Text");
         this.text = text;
     }
 

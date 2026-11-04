@@ -1,8 +1,10 @@
 package controller;
 
 import model.PIRManager;
+import model.command.CreateContact;
 import model.command.CreateText;
 import view.PIMView;
+import view.command.CreateContactView;
 import view.command.CreateTextView;
 import view.command.CreateView;
 
@@ -21,17 +23,26 @@ public class PIMController {
         int function, type = 0;
         view.initialMessage();
 
+        //One scanner for the whole session.
+        Scanner scanner = new Scanner(System.in);
+
         loop: //label of while loop
         while (true) {
             //input request
             view.inputMessage();
-            Scanner scanner = new Scanner(System.in);
 
             //Error handling
+            if (!scanner.hasNext()) {
+                //End of input: leave instead of reporting an error forever
+                view.exitMessage();
+                break loop;
+            }
+
             if (scanner.hasNextInt())
                 function = scanner.nextInt();
             else {
                 view.function_ErrorMessage();
+                scanner.nextLine(); //Discard the invalid token, or it would be read again forever
                 continue;
             }
 
@@ -77,7 +88,7 @@ public class PIMController {
             //Create Event
             case 3 -> {}
             //Create Contact
-            case 4 -> {}
+            case 4 -> createContact(scanner);
             default -> view.function_ErrorMessage();
         }
     }
@@ -110,6 +121,32 @@ public class PIMController {
     }
 
     private void createContact(Scanner scanner) {
+        CreateContactView contactView = new CreateContactView();
+        CreateContact create = new CreateContact();
 
+        if (scanner.hasNextLine())
+            scanner.nextLine();
+
+        contactView.inputNameMessage();
+        String name = scanner.nextLine();
+
+        while (name.isBlank()) {
+            contactView.emptyName();
+            name = scanner.nextLine();
+        }
+
+        contactView.inputPhoneMessage();
+        String phone = scanner.nextLine();
+
+        while (phone.isBlank()) {
+            contactView.emptyNumber();
+            phone = scanner.nextLine();
+        }
+
+        contactView.inputAddressMessage();
+        String address = scanner.nextLine();
+
+        create.createContact(manager, name, phone, address);
+        contactView.success();
     }
 }
