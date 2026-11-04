@@ -3,9 +3,11 @@ package controller;
 import model.PIRManager;
 import model.command.CreateContact;
 import model.command.CreateTask;
+import model.command.CreateEvent;
 import model.command.CreateText;
 import view.PIMView;
 import view.command.CreateContactView;
+import view.command.CreateEventView;
 import view.command.CreateTextView;
 import view.command.CreateView;
 import view.command.CreateTaskView;
@@ -90,7 +92,7 @@ public class PIMController {
             //Create Task
             case 2 -> createTask(scanner);
             //Create Event
-            case 3 -> {}
+            case 3 -> createEvent(scanner);
             //Create Contact
             case 4 -> createContact(scanner);
             default -> view.function_ErrorMessage();
@@ -158,7 +160,64 @@ public class PIMController {
     }
 
     private void createEvent(Scanner scanner) {
+        CreateEventView eventView = new CreateEventView();
+        CreateEvent create = new CreateEvent();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        if (scanner.hasNextLine())
+            scanner.nextLine();
+
+        eventView.inputDescMessage();
+        String description = scanner.nextLine();
+
+        while (description.isBlank()) {
+            eventView.emptyDesc();
+            description = scanner.nextLine();
+        }
+
+        LocalDateTime starting = null;
+        String startStr;
+        eventView.inputStartMessage();
+        while (starting == null) {
+            startStr = scanner.nextLine();
+            starting=parseDateTime(startStr, formatter);
+            if (starting == null) {
+                if (startStr.isBlank()) {
+                    eventView.emptyStart();
+                } else {
+                    eventView.startFormatError();
+                }
+            }
+        }
+
+        LocalDateTime alarm = null;
+        String alarmStr;
+        eventView.inputAlarmMessage();
+        while (alarm == null) {
+            alarmStr = scanner.nextLine();
+            alarm=parseDateTime(alarmStr, formatter);
+            if (alarm == null) {
+                if (alarmStr.isBlank()) {
+                    eventView.emptyAlarm();
+                } else {
+                    eventView.alarmFormatError();
+                }
+            } else if (alarm.isAfter(starting)){
+                eventView.invalidAlarm();
+                alarm = null;
+            }
+        }
+
+        create.createEvent(manager, description, alarm, starting);
+        eventView.success();
+    }
+
+    private LocalDateTime parseDateTime(String s, DateTimeFormatter formatter) {
+        try {
+            return LocalDateTime.parse(s, formatter);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void createContact(Scanner scanner) {
