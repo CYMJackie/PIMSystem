@@ -8,8 +8,7 @@ public class Event extends Record {
     private LocalDateTime starting, alarm;
 
     public Event(int id, String description, LocalDateTime alarm, LocalDateTime starting) {
-        String type = "Event";
-        super(id, type);
+        super(id, "Event");
         this.description = description;
         this.alarm = alarm;
         this.starting = starting;
