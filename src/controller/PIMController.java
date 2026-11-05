@@ -14,6 +14,7 @@ import view.command.CreateTaskView;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Scanner;
 
 public class PIMController {
@@ -132,37 +133,27 @@ public class PIMController {
             description = scanner.nextLine();
         }
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+                .withResolverStyle(ResolverStyle.STRICT);
+
+        LocalDateTime parsedDeadline = null;
         taskView.inputDeadlineMessage();
-        String deadline = scanner.nextLine();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        while (!isValidDeadline(deadline, formatter)) {
-            taskView.emptyDeadline();
-            deadline = scanner.nextLine();
+        while (parsedDeadline == null) {
+            String deadline = scanner.nextLine();
+            parsedDeadline = parseDateTime(deadline, formatter, taskView::emptyDeadline, taskView::deadlineFormatError);
         }
 
-        LocalDateTime parsedDeadline = LocalDateTime.parse(deadline, formatter);
+
         create.createTask(manager, description, parsedDeadline);
         taskView.success();
     }
 
-    private boolean isValidDeadline(String str, DateTimeFormatter formatter) {
-        if (str == null || str.isBlank()) {
-            return false;
-        }
-        try {
-            LocalDateTime.parse(str, formatter);
-            return true;
-        } catch (DateTimeParseException e) {
-            return false;
-        }
-    }
 
     private void createEvent(Scanner scanner) {
         CreateEventView eventView = new CreateEventView();
         CreateEvent create = new CreateEvent();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+                .withResolverStyle(ResolverStyle.STRICT);
 
         if (scanner.hasNextLine())
             scanner.nextLine();
@@ -176,33 +167,18 @@ public class PIMController {
         }
 
         LocalDateTime starting = null;
-        String startStr;
         eventView.inputStartMessage();
         while (starting == null) {
-            startStr = scanner.nextLine();
-            starting=parseDateTime(startStr, formatter);
-            if (starting == null) {
-                if (startStr.isBlank()) {
-                    eventView.emptyStart();
-                } else {
-                    eventView.startFormatError();
-                }
-            }
+            String startStr = scanner.nextLine();
+            starting=parseDateTime(startStr, formatter, eventView::emptyStart, eventView::startFormatError);
         }
 
         LocalDateTime alarm = null;
-        String alarmStr;
         eventView.inputAlarmMessage();
         while (alarm == null) {
-            alarmStr = scanner.nextLine();
-            alarm=parseDateTime(alarmStr, formatter);
-            if (alarm == null) {
-                if (alarmStr.isBlank()) {
-                    eventView.emptyAlarm();
-                } else {
-                    eventView.alarmFormatError();
-                }
-            } else if (alarm.isAfter(starting)){
+            String alarmStr = scanner.nextLine();
+            alarm=parseDateTime(alarmStr, formatter, eventView::emptyAlarm, eventView::alarmFormatError);
+            if (alarm != null && alarm.isAfter(starting)) {
                 eventView.invalidAlarm();
                 alarm = null;
             }
@@ -212,12 +188,18 @@ public class PIMController {
         eventView.success();
     }
 
-    private LocalDateTime parseDateTime(String s, DateTimeFormatter formatter) {
+    private LocalDateTime parseDateTime(String s, DateTimeFormatter formatter, Runnable emptyError, Runnable formatError) {
+        if (s.isBlank()) {
+            emptyError.run();
+            return null;
+        }
         try {
             return LocalDateTime.parse(s, formatter);
         } catch (Exception e) {
+            formatError.run();
             return null;
         }
+
     }
 
     private void createContact(Scanner scanner) {

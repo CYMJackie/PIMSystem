@@ -16,13 +16,19 @@ public class CreateTaskView {
 
     public void emptyDescription() {
         System.out.println("============================================================================================");
-        System.out.println("The description is empty, please enter again (Press enter to confirm): ");
+        System.out.println("The description can't be empty! Please enter again (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 
     public void emptyDeadline() {
         System.out.println("============================================================================================");
-        System.out.println("The deadline is empty or in wrong format, please enter again (Press enter to confirm): ");
+        System.out.println("The deadline can't be empty! Please enter again (Press enter to confirm): ");
+        System.out.println("============================================================================================");
+    }
+
+    public void deadlineFormatError() {
+        System.out.println("============================================================================================");
+        System.out.println("The format of deadline should be yyyy-MM-dd HH:mm:ss ! Please enter again (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 
