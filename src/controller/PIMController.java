@@ -2,12 +2,19 @@ package controller;
 
 import model.PIRManager;
 import model.command.CreateContact;
+import model.command.CreateTask;
+import model.command.CreateEvent;
 import model.command.CreateText;
 import view.PIMView;
 import view.command.CreateContactView;
+import view.command.CreateEventView;
 import view.command.CreateTextView;
 import view.command.CreateView;
-
+import view.command.CreateTaskView;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Scanner;
 
 public class PIMController {
@@ -84,9 +91,9 @@ public class PIMController {
             //Create Text
             case 1 -> createText(scanner);
             //Create Task
-            case 2 -> {}
+            case 2 -> createTask(scanner);
             //Create Event
-            case 3 -> {}
+            case 3 -> createEvent(scanner);
             //Create Contact
             case 4 -> createContact(scanner);
             default -> view.function_ErrorMessage();
@@ -113,10 +120,85 @@ public class PIMController {
     }
 
     private void createTask(Scanner scanner) {
+        CreateTaskView taskView = new CreateTaskView();
+        CreateTask create = new CreateTask();
 
+        if (scanner.hasNextLine())
+            scanner.nextLine();
+
+        taskView.inputDescriptionMessage();
+        String description = scanner.nextLine();
+        while (description.isBlank()) {
+            taskView.emptyDescription();
+            description = scanner.nextLine();
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+                .withResolverStyle(ResolverStyle.STRICT);
+
+        LocalDateTime parsedDeadline = null;
+        taskView.inputDeadlineMessage();
+        while (parsedDeadline == null) {
+            String deadline = scanner.nextLine();
+            parsedDeadline = parseDateTime(deadline, formatter, taskView::emptyDeadline, taskView::deadlineFormatError);
+        }
+
+
+        create.createTask(manager, description, parsedDeadline);
+        taskView.success();
     }
 
+
     private void createEvent(Scanner scanner) {
+        CreateEventView eventView = new CreateEventView();
+        CreateEvent create = new CreateEvent();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+                .withResolverStyle(ResolverStyle.STRICT);
+
+        if (scanner.hasNextLine())
+            scanner.nextLine();
+
+        eventView.inputDescMessage();
+        String description = scanner.nextLine();
+
+        while (description.isBlank()) {
+            eventView.emptyDesc();
+            description = scanner.nextLine();
+        }
+
+        LocalDateTime starting = null;
+        eventView.inputStartMessage();
+        while (starting == null) {
+            String startStr = scanner.nextLine();
+            starting=parseDateTime(startStr, formatter, eventView::emptyStart, eventView::startFormatError);
+        }
+
+        LocalDateTime alarm = null;
+        eventView.inputAlarmMessage();
+        while (alarm == null) {
+            String alarmStr = scanner.nextLine();
+            alarm=parseDateTime(alarmStr, formatter, eventView::emptyAlarm, eventView::alarmFormatError);
+            if (alarm != null && alarm.isAfter(starting)) {
+                eventView.invalidAlarm();
+                alarm = null;
+            }
+        }
+
+        create.createEvent(manager, description, alarm, starting);
+        eventView.success();
+    }
+
+    private LocalDateTime parseDateTime(String s, DateTimeFormatter formatter, Runnable emptyError, Runnable formatError) {
+        if (s.isBlank()) {
+            emptyError.run();
+            return null;
+        }
+        try {
+            return LocalDateTime.parse(s, formatter);
+        } catch (Exception e) {
+            formatError.run();
+            return null;
+        }
 
     }
 
