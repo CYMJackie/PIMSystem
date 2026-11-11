@@ -1,4 +1,29 @@
 package view.command;
 
 public class LoadView {
+
+    public void inputFileName() {
+        System.out.println("============================================================================================");
+        System.out.println("Enter file name or full path to load: (Press enter to confirm)");
+        System.out.println("============================================================================================");
+    }
+
+    public void successLoad() {
+        System.out.println("============================================================================================");
+        System.out.println("Records are loaded successfully. ");
+        System.out.println("============================================================================================");
+    }
+
+    public void failLoad(String message) {
+        System.out.println("============================================================================================");
+        System.out.println("Loading failed! Error Message: " + message);
+        System.out.println("============================================================================================");
+    }
+
+    public void wrongFileType() {
+        System.out.println("============================================================================================");
+        System.out.println("File selected must end with \".pim\" extension! Please select other file (Press enter to confirm): ");
+        System.out.println("============================================================================================");
+    }
+
 }
