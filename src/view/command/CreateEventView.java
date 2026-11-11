@@ -21,14 +21,14 @@ public class CreateEventView {
 
     public void emptyDesc() {
         System.out.println("============================================================================================");
-        System.out.println("The description can't be empty! Please input the description again(Press enter to confirm): ");
+        System.out.println("The description can't be empty! Please input the description again (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 
 
     public void emptyStart() {
         System.out.println("============================================================================================");
-        System.out.println("The starting time can't be empty! Please input the starting time again(Press enter to confirm): ");
+        System.out.println("The starting time can't be empty! Please input the starting time again (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 
@@ -40,20 +40,20 @@ public class CreateEventView {
 
     public void startFormatError() {
         System.out.println("============================================================================================");
-        System.out.println("The format of starting time should be yyyy-MM-dd HH:mm:ss ! Please input the starting time again(Press enter to confirm): ");
+        System.out.println("The format of starting time should be yyyy-MM-dd HH:mm:ss! Please input the starting time again (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 
 
     public void alarmFormatError() {
         System.out.println("============================================================================================");
-        System.out.println("The format of alarm time should be yyyy-MM-dd HH:mm:ss ! Please input the alarm time again(Press enter to confirm): ");
+        System.out.println("The format of alarm time should be yyyy-MM-dd HH:mm:ss! Please input the alarm time again (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 
     public void invalidAlarm() {
         System.out.println("============================================================================================");
-        System.out.println("The alarm time should before the starting time! Please input the alarm time again(Press enter to confirm): ");
+        System.out.println("The alarm time should before the starting time! Please input the alarm time again (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 
