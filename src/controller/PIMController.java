@@ -9,6 +9,7 @@ import view.command.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
@@ -284,6 +285,8 @@ public class PIMController {
             }
             default -> view.function_ErrorMessage();
         }
+    }
+
     private void search(Scanner scanner) {
         SearchView searchView = new SearchView();
         Search search = new Search();
@@ -315,7 +318,7 @@ public class PIMController {
         int openGroups = 0;
 
         while (true) {
-            TokenType last = tokens.isEmpty() ? null : tokens.get(tokens.size() - 1).getType();
+            TokenType last = tokens.isEmpty() ? null : tokens.getLast().getType();
             boolean operandExpected = last == null
                     || last == TokenType.LEFT_PAREN
                     || last == TokenType.AND
@@ -365,7 +368,7 @@ public class PIMController {
                 }
                 case REMOVE_LAST -> {
                     //Keep the open group count in step: dropping a ')' re-opens a group, dropping a '(' closes it
-                    TokenType removed = tokens.remove(tokens.size() - 1).getType();
+                    TokenType removed = tokens.removeLast().getType();
                     if (removed == TokenType.RIGHT_PAREN)
                         openGroups++;
                     else if (removed == TokenType.LEFT_PAREN)
