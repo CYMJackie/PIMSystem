@@ -2,18 +2,13 @@ package model;
 
 public abstract class Record {
     private final int id;
-    private final String type;
 
-    protected Record(int id, String type) {
+    protected Record(int id) {
         this.id = id;
-        this.type = type;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getType() {
-        return type;
-    }
 }

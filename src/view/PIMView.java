@@ -26,10 +26,6 @@ public class PIMView {
         System.out.println("The input is invalid. Please input again!");
     }
 
-    public void exitEnsureMessage() {
-        System.out.print("Do u want to exit without saving(Y/N)? ");
-    }
-
     public void exitMessage() {
         System.out.println("Thank You! See you next time.");
     }

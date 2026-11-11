@@ -8,7 +8,7 @@ public class Task extends Record {
     private LocalDateTime deadline;
 
     public Task(int id, String description, LocalDateTime deadline) {
-        super(id, "Task");
+        super(id);
         this.description = description;
         this.deadline = deadline;
     }

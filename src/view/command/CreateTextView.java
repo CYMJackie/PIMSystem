@@ -9,7 +9,7 @@ public class CreateTextView {
 
     public void emptyInput() {
         System.out.println("============================================================================================");
-        System.out.println("The description can't be empty! Please input relative description(Press enter to confirm): ");
+        System.out.println("The description can't be empty! Please input relative description (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 

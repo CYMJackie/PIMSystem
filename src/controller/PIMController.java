@@ -1,28 +1,14 @@
 package controller;
 
 import model.PIRManager;
-import model.command.CreateContact;
-import model.command.CreateTask;
-import model.command.CreateEvent;
-import model.command.CreateText;
-import model.command.Search;
-import model.search.Criterion;
-import model.search.Field;
-import model.search.Operator;
-import model.search.SearchResult;
-import model.search.Token;
-import model.search.TokenType;
-import model.search.Type;
+import model.command.*;
+import model.Record;
+import model.search.*;
 import view.PIMView;
-import view.command.CreateContactView;
-import view.command.CreateEventView;
-import view.command.CreateTextView;
-import view.command.CreateView;
-import view.command.CreateTaskView;
-import view.command.SearchView;
+import view.command.*;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +17,7 @@ import java.util.Scanner;
 public class PIMController {
     private final PIMView view;
     private final PIRManager manager;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").withResolverStyle(ResolverStyle.STRICT);
 
     public PIMController(PIRManager manager, PIMView view) {
         this.manager = manager;
@@ -38,7 +25,7 @@ public class PIMController {
     }
 
     public void initialize() {
-        int function, type = 0;
+        int function;
         view.initialMessage();
 
         //One scanner for the whole session.
@@ -53,11 +40,13 @@ public class PIMController {
             if (!scanner.hasNext()) {
                 //End of input: leave instead of reporting an error forever
                 view.exitMessage();
-                break loop;
+                break;
             }
 
-            if (scanner.hasNextInt())
+            if (scanner.hasNextInt()) {
                 function = scanner.nextInt();
+                scanner.nextLine();
+            }
             else {
                 view.function_ErrorMessage();
                 scanner.nextLine(); //Discard the invalid token, or it would be read again forever
@@ -66,15 +55,15 @@ public class PIMController {
 
             switch (function) {
                 //Create record
-                case 1 -> create(scanner, type);
+                case 1 -> create(scanner);
                 //Modify record
                 case 2 -> {}
                 //Delete record
-                case 3 -> {}
+                case 3 -> delete(scanner);
                 //Search record
                 case 4 -> search(scanner);
                 //Print record
-                case 5 -> {}
+                case 5 -> print(scanner);
                 //Store record
                 case 6 -> {}
                 //Load record
@@ -89,14 +78,18 @@ public class PIMController {
         }
     }
 
-    private void create(Scanner scanner, int type) {
+    private void create(Scanner scanner) {
         CreateView createView = new CreateView();
+        int type = 0;
 
         createView.inputMessage();
 
         //Error handling of whether "type" is integer
-        if (scanner.hasNextInt())
+        if (scanner.hasNextInt()) {
             type = scanner.nextInt();
+            scanner.nextLine();
+        }
+        else scanner.nextLine();
 
         switch (type) {
             //Create Text
@@ -115,9 +108,6 @@ public class PIMController {
         CreateTextView textView = new CreateTextView();
         CreateText create = new CreateText();
 
-        if (scanner.hasNextLine())
-            scanner.nextLine();
-
         textView.inputMessage();
         String description = scanner.nextLine();
 
@@ -134,18 +124,12 @@ public class PIMController {
         CreateTaskView taskView = new CreateTaskView();
         CreateTask create = new CreateTask();
 
-        if (scanner.hasNextLine())
-            scanner.nextLine();
-
         taskView.inputDescriptionMessage();
         String description = scanner.nextLine();
         while (description.isBlank()) {
             taskView.emptyDescription();
             description = scanner.nextLine();
         }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
-                .withResolverStyle(ResolverStyle.STRICT);
 
         LocalDateTime parsedDeadline = null;
         taskView.inputDeadlineMessage();
@@ -163,11 +147,6 @@ public class PIMController {
     private void createEvent(Scanner scanner) {
         CreateEventView eventView = new CreateEventView();
         CreateEvent create = new CreateEvent();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
-                .withResolverStyle(ResolverStyle.STRICT);
-
-        if (scanner.hasNextLine())
-            scanner.nextLine();
 
         eventView.inputDescMessage();
         String description = scanner.nextLine();
@@ -217,9 +196,6 @@ public class PIMController {
         CreateContactView contactView = new CreateContactView();
         CreateContact create = new CreateContact();
 
-        if (scanner.hasNextLine())
-            scanner.nextLine();
-
         contactView.inputNameMessage();
         String name = scanner.nextLine();
 
@@ -243,6 +219,71 @@ public class PIMController {
         contactView.success();
     }
 
+    private void delete(Scanner scanner) {
+        DeleteView deleteView = new DeleteView();
+        Delete delete = new Delete();
+        int id = -1;
+
+        deleteView.inputMessage();
+
+        while (!scanner.hasNextInt()) {
+            deleteView.invalidInput();
+            scanner.nextLine();
+        }
+
+        id = scanner.nextInt();
+        scanner.nextLine();
+
+        if(delete.delete(manager, id))
+            deleteView.success();
+        else deleteView.fail();
+    }
+
+    private void print(Scanner scanner) {
+        PrintView printView = new PrintView();
+        Print print = new Print();
+        int type = 0;
+
+        printView.inputMessage();
+        if (scanner.hasNextInt()) {
+            type = scanner.nextInt();
+            scanner.nextLine();
+        } else scanner.nextLine();
+
+        switch (type) {
+            //Specific PIR
+            case 1 -> {
+                int id;
+                Record record = null;
+
+                printView.inputIDMessage();
+
+                while (!scanner.hasNextInt()) {
+                    printView.invalidInput();
+                    scanner.nextLine();
+                }
+
+                id = scanner.nextInt();
+                scanner.nextLine();
+
+                record = print.searchByID(manager, id);
+
+                if (record == null) {
+                    printView.fail();
+                } else {
+                    printView.success();
+                    print.print(List.of(record), formatter);
+                }
+            }
+            //All PIR
+            case 2 -> {
+                if (!manager.getRecords().isEmpty()) {
+                    printView.success();
+                    print.print(manager.getRecords(), formatter);
+                } else printView.emptyMessage();
+            }
+            default -> view.function_ErrorMessage();
+        }
     private void search(Scanner scanner) {
         SearchView searchView = new SearchView();
         Search search = new Search();
