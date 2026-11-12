@@ -6,7 +6,7 @@ public class Contact extends Record {
     private String name, phone, address;
 
     public Contact(int id, String name, String phone, String address) {
-        super(id);
+        super(id, "Contact");
         this.name = name;
         this.phone = phone;
         this.address = address;
