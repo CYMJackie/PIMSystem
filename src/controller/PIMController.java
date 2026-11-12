@@ -66,9 +66,9 @@ public class PIMController {
                 //Print record
                 case 5 -> print(scanner);
                 //Store record
-                case 6 -> {}
+                case 6 -> save(scanner);
                 //Load record
-                case 7 -> {}
+                case 7 -> load(scanner);
                 //Exit
                 case 8 -> {
                     view.exitMessage();
@@ -218,6 +218,50 @@ public class PIMController {
 
         create.createContact(manager, name, phone, address);
         contactView.success();
+    }
+
+    private void save(Scanner scanner) {
+        SaveView view = new SaveView();
+        Save save = new Save();
+
+        if (manager.getRecords().isEmpty()) {
+            view.emptyRecord();
+            return;
+        }
+
+        view.inputFileName();
+        String fileName = scanner.nextLine();
+
+        if (!fileName.endsWith(".pim")) {
+            fileName = fileName + ".pim";
+        }
+
+        try {
+            save.exe(manager, fileName);
+            view.successSave();
+        } catch (Exception e){
+            view.failSave(e.getMessage());
+        }
+    }
+
+    private void load(Scanner scanner) {
+        LoadView view = new LoadView();
+        Load load = new Load();
+
+        view.inputFileName();
+        String fileName = scanner.nextLine();
+
+        while (!fileName.endsWith(".pim")) {
+            view.wrongFileType();
+            fileName = scanner.nextLine();
+        }
+
+        try {
+            load.exe(manager, fileName);
+            view.successLoad();
+        } catch (Exception e){
+            view.failLoad(e.getMessage());
+        }
     }
 
     private void delete(Scanner scanner) {
