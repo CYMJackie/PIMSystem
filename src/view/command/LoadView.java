@@ -8,6 +8,12 @@ public class LoadView {
         System.out.println("============================================================================================");
     }
 
+    public void emptyFileName() {
+        System.out.println("============================================================================================");
+        System.out.println("File name cannot be empty! Please input again (Press enter to confirm): ");
+        System.out.println("============================================================================================");
+    }
+
     public void successLoad() {
         System.out.println("============================================================================================");
         System.out.println("Records are loaded successfully. ");

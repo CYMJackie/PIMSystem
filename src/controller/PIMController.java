@@ -230,7 +230,12 @@ public class PIMController {
         }
 
         view.inputFileName();
-        String fileName = scanner.nextLine();
+        String fileName = scanner.nextLine().replaceAll("\\s+", "");
+
+        while (fileName.isBlank()) {
+            view.emptyFileName();
+            fileName = scanner.nextLine().replaceAll("\\s+", "");
+        }
 
         if (!fileName.endsWith(".pim")) {
             fileName = fileName + ".pim";
@@ -249,11 +254,15 @@ public class PIMController {
         Load load = new Load();
 
         view.inputFileName();
-        String fileName = scanner.nextLine();
+        String fileName = scanner.nextLine().replaceAll("\\s+", "");
 
-        while (!fileName.endsWith(".pim")) {
-            view.wrongFileType();
-            fileName = scanner.nextLine();
+        while (!fileName.endsWith(".pim") || fileName.isBlank()) {
+            if (fileName.isBlank()) {
+                view.emptyFileName();
+            } else {
+                view.wrongFileType();
+            }
+            fileName = scanner.nextLine().replaceAll("\\s+", "");
         }
 
         try {

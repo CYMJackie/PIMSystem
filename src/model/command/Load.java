@@ -58,5 +58,14 @@ public class Load {
             }
         }
         manager.setRecords(newRecords);
+
+        int maxID = 0;
+        for (Record r : newRecords) {
+            if (r.getId() > maxID) {
+                maxID = r.getId();
+            }
+        }
+
+        manager.setCurrentID(maxID + 1);
     }
 }
