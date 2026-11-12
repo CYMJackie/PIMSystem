@@ -58,7 +58,7 @@ public class PIMController {
                 //Create record
                 case 1 -> create(scanner);
                 //Modify record
-                case 2 -> {}
+                case 2 -> modify(scanner);
                 //Delete record
                 case 3 -> delete(scanner);
                 //Search record
@@ -554,5 +554,105 @@ public class PIMController {
         }
         view.invalidInputMessage();
         return 0;
+    }
+
+    private void modify(Scanner scanner) {
+        ModifyView modifyView = new ModifyView();
+        Modify modify = new Modify();
+        Record record = null;
+
+        // Loop until a valid record is found or user inputs an exit condition (negative ID)
+        while (record == null) {
+            modifyView.inputMessage();
+
+            while (!scanner.hasNextInt()) {
+                modifyView.invalidInput();
+                scanner.nextLine();
+                modifyView.inputMessage();
+            }
+
+            int id = scanner.nextInt();
+            scanner.nextLine();
+
+            if (id < 0) {
+                System.out.println("Modification cancelled.");
+                return;
+            }
+
+            record = modify.searchByID(manager, id);
+
+            if (record == null) {
+                modifyView.recordNotFound();
+                System.out.println("Please try entering the ID again (or enter a negative number to cancel).");
+            }
+        }
+
+        // PRINT THE PIR to be modified
+        modifyView.displayRecordDetails(record, formatter);
+
+        // Determine record type and prompt for appropriate updates
+        String className = record.getClass().getSimpleName();
+        boolean modified = false;
+
+        switch (className) {
+            case "Text" -> {
+                modifyView.inputDescriptionMessage();
+                String desc = scanner.nextLine();
+                if (!desc.isBlank()) {
+                    modified = modify.modifyText(record, desc);
+                } else {
+                    modified = true;
+                }
+            }
+            case "Task" -> {
+                modifyView.inputDescriptionMessage();
+                String desc = scanner.nextLine();
+
+                modifyView.inputDeadlineMessage();
+                String deadlineStr = scanner.nextLine();
+                LocalDateTime deadline = deadlineStr.isBlank() ? null : parseDateTime(deadlineStr, formatter, () -> {}, () -> {});
+
+                modified = modify.modifyTask(record, desc.isBlank() ? null : desc, deadline);
+            }
+            case "Event" -> {
+                modifyView.inputDescriptionMessage();
+                String desc = scanner.nextLine();
+
+                modifyView.inputStartMessage();
+                String startStr = scanner.nextLine();
+                LocalDateTime start = startStr.isBlank() ? null : parseDateTime(startStr, formatter, () -> {}, () -> {});
+
+                modifyView.inputAlarmMessage();
+                String alarmStr = scanner.nextLine();
+                LocalDateTime alarm = alarmStr.isBlank() ? null : parseDateTime(alarmStr, formatter, () -> {}, () -> {});
+
+                modified = modify.modifyEvent(record, desc.isBlank() ? null : desc, start, alarm);
+            }
+            case "Contact" -> {
+                modifyView.inputNameMessage();
+                String name = scanner.nextLine();
+
+                modifyView.inputPhoneMessage();
+                String phone = scanner.nextLine();
+
+                modifyView.inputAddressMessage();
+                String address = scanner.nextLine();
+
+                modified = modify.modifyContact(record,
+                        name.isBlank() ? null : name,
+                        phone.isBlank() ? null : phone,
+                        address.isBlank() ? null : address);
+            }
+            default -> {
+                modifyView.fail();
+                return;
+            }
+        }
+
+        if (modified) {
+            modifyView.success();
+        } else {
+            modifyView.fail();
+        }
     }
 }
