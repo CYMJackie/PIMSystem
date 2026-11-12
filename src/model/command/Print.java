@@ -18,9 +18,7 @@ public class Print {
             System.out.println("PIR ID: " + record.getId());
             System.out.println("Type: " + record.getType());
             switch (record) {
-                case Text text -> {
-                    System.out.println("Note: " + text.getText());
-                }
+                case Text text -> System.out.println("Note: " + text.getText());
                 case Task task -> {
                     System.out.println("Description: " + task.getDescription());
                     System.out.println("Deadline: " + task.getDeadline().format(formatter));
