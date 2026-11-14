@@ -2,6 +2,7 @@ package controller;
 
 import model.PIRManager;
 import model.command.*;
+import model.record.*;
 import model.Record;
 import model.search.*;
 import view.PIMView;
@@ -608,23 +609,64 @@ public class PIMController {
                 modifyView.inputDescriptionMessage();
                 String desc = scanner.nextLine();
 
-                modifyView.inputDeadlineMessage();
-                String deadlineStr = scanner.nextLine();
-                LocalDateTime deadline = deadlineStr.isBlank() ? null : parseDateTime(deadlineStr, formatter, () -> {}, () -> {});
-
+                LocalDateTime deadline = null;
+                if (record instanceof Task taskRecord) {
+                    while (true) {
+                        modifyView.inputDeadlineMessage();
+                        String deadlineStr = scanner.nextLine();
+                        if (deadlineStr.isBlank()) {
+                            deadline = taskRecord.getDeadline();
+                            break;
+                        }
+                        try {
+                            deadline = LocalDateTime.parse(deadlineStr, formatter);
+                            break;
+                        } catch (Exception e) {
+                            ModifyView.deadlineFormatError();
+                        }
+                    }
+                }
                 modified = modify.modifyTask(record, desc.isBlank() ? null : desc, deadline);
             }
             case "Event" -> {
                 modifyView.inputDescriptionMessage();
                 String desc = scanner.nextLine();
 
-                modifyView.inputStartMessage();
-                String startStr = scanner.nextLine();
-                LocalDateTime start = startStr.isBlank() ? null : parseDateTime(startStr, formatter, () -> {}, () -> {});
 
-                modifyView.inputAlarmMessage();
-                String alarmStr = scanner.nextLine();
-                LocalDateTime alarm = alarmStr.isBlank() ? null : parseDateTime(alarmStr, formatter, () -> {}, () -> {});
+                LocalDateTime start = null;
+                LocalDateTime alarm = null;
+
+                if (record instanceof Event eventRecord) {
+                    while (true) {
+                        modifyView.inputStartMessage();
+                        String startStr = scanner.nextLine();
+                        if (startStr.isBlank()) {
+                            start = eventRecord.getStarting();
+                            break;
+                        }
+                        try {
+                            start = LocalDateTime.parse(startStr, formatter);
+                            break;
+                        } catch (Exception e) {
+                            ModifyView.startingTimeFormatError();
+                        }
+                    }
+
+                    while (true) {
+                        modifyView.inputAlarmMessage();
+                        String alarmStr = scanner.nextLine();
+                        if (alarmStr.isBlank()) {
+                            alarm = eventRecord.getAlarm();
+                            break;
+                        }
+                        try {
+                            alarm = LocalDateTime.parse(alarmStr, formatter);
+                            break;
+                        } catch (Exception e) {
+                            ModifyView.alarmTimeFormatError();
+                        }
+                    }
+                }
 
                 modified = modify.modifyEvent(record, desc.isBlank() ? null : desc, start, alarm);
             }
