@@ -276,7 +276,7 @@ public class PIMController {
     private void delete(Scanner scanner) {
         DeleteView deleteView = new DeleteView();
         Delete delete = new Delete();
-        int id = -1;
+        int id;
 
         deleteView.inputMessage();
 
@@ -308,7 +308,7 @@ public class PIMController {
             //Specific PIR
             case 1 -> {
                 int id;
-                Record record = null;
+                Record record;
 
                 printView.inputIDMessage();
 
