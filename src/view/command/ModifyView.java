@@ -18,6 +18,14 @@ public class ModifyView {
         System.out.println("Record with the specified ID was not found.");
     }
 
+    public void cancelled() {
+        System.out.println("Modification cancelled.");
+    }
+
+    public void tryAgain() {
+        System.out.println("Please try entering the ID again (or enter a negative number to cancel).");
+    }
+
     /**
      * Delegates printing of the record directly to the View layer.
      */
@@ -36,7 +44,7 @@ public class ModifyView {
         System.out.print("Enter new deadline (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
     }
 
-    public static void deadlineFormatError() {
+    public void deadlineFormatError() {
         System.out.println("Invalid deadline format! Please enter a valid deadline format.");
     }
 
@@ -44,7 +52,7 @@ public class ModifyView {
         System.out.print("Enter new starting time (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
     }
 
-    public static void startingTimeFormatError() {
+    public void startingTimeFormatError() {
         System.out.println("Invalid start time format! Please enter a valid start time format.");
     }
 
@@ -52,7 +60,7 @@ public class ModifyView {
         System.out.print("Enter new alarm time (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
     }
 
-    public static void alarmTimeFormatError() {
+    public void alarmTimeFormatError() {
         System.out.println("Invalid alarm time format! Please enter a valid alarm time format.");
     }
 
