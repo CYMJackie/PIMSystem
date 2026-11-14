@@ -33,15 +33,27 @@ public class ModifyView {
     }
 
     public void inputDeadlineMessage() {
-        System.out.print("Enter new deadline (uuuu-MM-dd HH:mm:ss, leave blank to keep current): ");
+        System.out.print("Enter new deadline (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
+    }
+
+    public static void deadlineFormatError() {
+        System.out.println("Invalid deadline format! Please enter a valid deadline format.");
     }
 
     public void inputStartMessage() {
-        System.out.print("Enter new starting time (uuuu-MM-dd HH:mm:ss, leave blank to keep current): ");
+        System.out.print("Enter new starting time (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
+    }
+
+    public static void startingTimeFormatError() {
+        System.out.println("Invalid start time format! Please enter a valid start time format.");
     }
 
     public void inputAlarmMessage() {
-        System.out.print("Enter new alarm time (uuuu-MM-dd HH:mm:ss, leave blank to keep current): ");
+        System.out.print("Enter new alarm time (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
+    }
+
+    public static void alarmTimeFormatError() {
+        System.out.println("Invalid alarm time format! Please enter a valid alarm time format.");
     }
 
     public void inputNameMessage() {
