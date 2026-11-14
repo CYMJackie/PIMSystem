@@ -567,7 +567,7 @@ public class PIMController {
             scanner.nextLine();
 
             if (id < 0) {
-                System.out.println("Modification cancelled.");
+                modifyView.cancelled();
                 return;
             }
 
@@ -575,7 +575,7 @@ public class PIMController {
 
             if (record == null) {
                 modifyView.recordNotFound();
-                System.out.println("Please try entering the ID again (or enter a negative number to cancel).");
+                modifyView.tryAgain();
             }
         }
 
@@ -613,7 +613,7 @@ public class PIMController {
                             deadline = LocalDateTime.parse(deadlineStr, formatter);
                             break;
                         } catch (Exception e) {
-                            ModifyView.deadlineFormatError();
+                            modifyView.deadlineFormatError();
                         }
                     }
                 }
@@ -639,7 +639,7 @@ public class PIMController {
                             start = LocalDateTime.parse(startStr, formatter);
                             break;
                         } catch (Exception e) {
-                            ModifyView.startingTimeFormatError();
+                            modifyView.startingTimeFormatError();
                         }
                     }
 
@@ -654,7 +654,7 @@ public class PIMController {
                             alarm = LocalDateTime.parse(alarmStr, formatter);
                             break;
                         } catch (Exception e) {
-                            ModifyView.alarmTimeFormatError();
+                            modifyView.alarmTimeFormatError();
                         }
                     }
                 }
