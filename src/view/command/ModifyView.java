@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ModifyView {
     public void inputMessage() {
-        System.out.print("Enter the ID of the record you want to modify: ");
+        System.out.print("Enter the ID of the record you want to modify (press enter without typing anything to return to the menu): ");
     }
 
     public void invalidInput() {
@@ -23,7 +23,7 @@ public class ModifyView {
     }
 
     public void tryAgain() {
-        System.out.println("Please try entering the ID again (or enter a negative number to cancel).");
+        System.out.println("Please try entering the ID again (or press enter without typing anything to return to the menu).");
     }
 
     /**

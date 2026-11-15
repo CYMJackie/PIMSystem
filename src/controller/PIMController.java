@@ -295,19 +295,24 @@ public class PIMController {
     private void delete(Scanner scanner) {
         DeleteView deleteView = new DeleteView();
         Delete delete = new Delete();
-        int id;
 
         deleteView.inputMessage();
 
-        // Keep asking until a record is deleted; a negative ID cancels the function
+        // Keep asking until a record is deleted; an empty line returns to the main menu
         while (true) {
-            while (!scanner.hasNextInt()) {
-                deleteView.invalidInput();
-                if (readLine(scanner) == null) return;
+            String line = readLine(scanner);
+            if (line == null || line.isBlank()) {
+                deleteView.cancelled();
+                return;
             }
 
-            id = scanner.nextInt();
-            scanner.nextLine();
+            int id;
+            try {
+                id = Integer.parseInt(line.trim());
+            } catch (NumberFormatException e) {
+                deleteView.invalidInput();
+                continue;
+            }
 
             if (id < 0) {
                 deleteView.cancelled();
@@ -338,25 +343,33 @@ public class PIMController {
             //Specific PIR
             case 1 -> {
                 int id;
-                Record record;
 
                 printView.inputIDMessage();
 
-                while (!scanner.hasNextInt()) {
-                    printView.invalidInput();
-                    if (readLine(scanner) == null) return;
-                }
+                // Keep asking until a record is printed; an empty line returns to the main menu
+                while (true) {
+                    String line = readLine(scanner);
+                    if (line == null || line.isBlank()) {
+                        printView.cancelled();
+                        return;
+                    }
 
-                id = scanner.nextInt();
-                readLine(scanner);
+                    try {
+                        id = Integer.parseInt(line.trim());
+                    } catch (NumberFormatException e) {
+                        printView.invalidInput();
+                        continue;
+                    }
 
-                record = print.searchByID(manager, id);
+                    Record record = print.searchByID(manager, id);
+                    if (record == null) {
+                        printView.fail();
+                        continue;
+                    }
 
-                if (record == null) {
-                    printView.fail();
-                } else {
                     printView.success();
                     print.print(List.of(record), formatter);
+                    return;
                 }
             }
             //All PIR
@@ -618,18 +631,23 @@ public class PIMController {
         Modify modify = new Modify();
         Record record = null;
 
-        // Loop until a valid record is found or user inputs an exit condition (negative ID)
+        // Loop until a valid record is found; an empty line returns to the main menu
         while (record == null) {
             modifyView.inputMessage();
 
-            while (!scanner.hasNextInt()) {
-                modifyView.invalidInput();
-                if (readLine(scanner) == null) return;
-                modifyView.inputMessage();
+            String line = readLine(scanner);
+            if (line == null || line.isBlank()) {
+                modifyView.cancelled();
+                return;
             }
 
-            int id = scanner.nextInt();
-            readLine(scanner);
+            int id;
+            try {
+                id = Integer.parseInt(line.trim());
+            } catch (NumberFormatException e) {
+                modifyView.invalidInput();
+                continue;
+            }
 
             if (id < 0) {
                 modifyView.cancelled();
