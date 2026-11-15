@@ -433,11 +433,12 @@ public class PIMController {
             }
             options.add(SearchView.Option.CANCEL);
 
-            int choice = 0;
-            while (choice == 0) {
-                view.menu(Token.renderQuery(tokens), options);
+            // The menu is printed once per step: an invalid answer only repeats the prompt,
+            // because readChoice() prints the error and the prompt again itself
+            view.menu(Token.renderQuery(tokens), options);
+            int choice = readChoice(scanner, view, options.size());
+            while (choice == 0)
                 choice = readChoice(scanner, view, options.size());
-            }
             if (choice == -1)
                 return null;
 
@@ -507,8 +508,9 @@ public class PIMController {
 
     private Field readField(Scanner scanner, SearchView view) {
         Field[] fields = Field.values();
+        view.fieldMenu();
+        // An invalid answer repeats the prompt only, so the menu is not printed a second time
         while (true) {
-            view.fieldMenu();
             int choice = readChoice(scanner, view, fields.length + 1);
             if (choice == -1)
                 return null;
@@ -522,8 +524,8 @@ public class PIMController {
 
     private Type readType(Scanner scanner, SearchView view) {
         Type[] types = Type.values();
+        view.typeMenu();
         while (true) {
-            view.typeMenu();
             int choice = readChoice(scanner, view, types.length + 1);
             if (choice == -1)
                 return null;
@@ -536,8 +538,8 @@ public class PIMController {
     }
 
     private Operator readOperator(Scanner scanner, SearchView view, Field field, String query) {
+        view.operatorMenu(query, field);
         while (true) {
-            view.operatorMenu(query, field);
             int choice = readChoice(scanner, view, 4);
             if (choice == -1)
                 return null;
@@ -553,8 +555,8 @@ public class PIMController {
     }
 
     private Token readLogical(Scanner scanner, SearchView view) {
+        view.logicalMenu();
         while (true) {
-            view.logicalMenu();
             int choice = readChoice(scanner, view, 3);
             if (choice == -1)
                 return null;
