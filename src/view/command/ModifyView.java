@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ModifyView {
     public void inputMessage() {
-        System.out.print("Enter the ID of the record you want to modify: ");
+        System.out.print("Enter the ID of the record you want to modify (press enter without typing anything to return to the menu): ");
     }
 
     public void invalidInput() {
@@ -23,7 +23,7 @@ public class ModifyView {
     }
 
     public void tryAgain() {
-        System.out.println("Please try entering the ID again (or enter a negative number to cancel).");
+        System.out.println("Please try entering the ID again (or press enter without typing anything to return to the menu).");
     }
 
     /**
@@ -41,7 +41,7 @@ public class ModifyView {
     }
 
     public void inputDeadlineMessage() {
-        System.out.print("Enter new deadline (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
+        System.out.print("Enter new deadline (yyyy-MM-dd HH:mm:ss, leave blank to keep current, - to cancel): ");
     }
 
     public void deadlineFormatError() {
@@ -49,7 +49,7 @@ public class ModifyView {
     }
 
     public void inputStartMessage() {
-        System.out.print("Enter new starting time (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
+        System.out.print("Enter new starting time (yyyy-MM-dd HH:mm:ss, leave blank to keep current, - to cancel): ");
     }
 
     public void startingTimeFormatError() {
@@ -57,11 +57,15 @@ public class ModifyView {
     }
 
     public void inputAlarmMessage() {
-        System.out.print("Enter new alarm time (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
+        System.out.print("Enter new alarm time (yyyy-MM-dd HH:mm:ss, leave blank to keep current, - to cancel): ");
     }
 
     public void alarmTimeFormatError() {
         System.out.println("Invalid alarm time format! Please enter a valid alarm time format.");
+    }
+
+    public void invalidAlarm() {
+        System.out.println("The alarm cannot be later than the starting time! Please enter the alarm again (or leave it blank to keep the current one).");
     }
 
     public void inputNameMessage() {
@@ -78,6 +82,10 @@ public class ModifyView {
 
     public void success() {
         System.out.println("Record successfully modified.");
+    }
+
+    public void noChange() {
+        System.out.println("No changes were made.");
     }
 
     public void fail() {

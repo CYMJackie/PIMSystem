@@ -89,9 +89,9 @@ public class PIMController {
         //Error handling of whether "type" is integer
         if (scanner.hasNextInt()) {
             type = scanner.nextInt();
-            scanner.nextLine();
+            readLine(scanner);
         }
-        else scanner.nextLine();
+        else if (readLine(scanner) == null) return;
 
         switch (type) {
             //Create Text
@@ -111,12 +111,14 @@ public class PIMController {
         CreateText create = new CreateText();
 
         textView.inputMessage();
-        String description = scanner.nextLine();
+        String description = readLine(scanner);
 
-        while (description.isBlank()) {
+        while (description != null && description.isBlank()) {
             textView.emptyInput();
-            description = scanner.nextLine();
+            description = readLine(scanner);
         }
+
+        if (description == null) return;
 
         create.createText(manager, description);
         textView.success();
@@ -127,16 +129,18 @@ public class PIMController {
         CreateTask create = new CreateTask();
 
         taskView.inputDescriptionMessage();
-        String description = scanner.nextLine();
-        while (description.isBlank()) {
+        String description = readLine(scanner);
+        while (description != null && description.isBlank()) {
             taskView.emptyDescription();
-            description = scanner.nextLine();
+            description = readLine(scanner);
         }
+        if (description == null) return;
 
         LocalDateTime parsedDeadline = null;
         taskView.inputDeadlineMessage();
         while (parsedDeadline == null) {
-            String deadline = scanner.nextLine();
+            String deadline = readLine(scanner);
+            if (deadline == null) return;
             parsedDeadline = parseDateTime(deadline, formatter, taskView::emptyDeadline, taskView::deadlineFormatError);
         }
 
@@ -151,24 +155,27 @@ public class PIMController {
         CreateEvent create = new CreateEvent();
 
         eventView.inputDescMessage();
-        String description = scanner.nextLine();
+        String description = readLine(scanner);
 
-        while (description.isBlank()) {
+        while (description != null && description.isBlank()) {
             eventView.emptyDesc();
-            description = scanner.nextLine();
+            description = readLine(scanner);
         }
+        if (description == null) return;
 
         LocalDateTime starting = null;
         eventView.inputStartMessage();
         while (starting == null) {
-            String startStr = scanner.nextLine();
+            String startStr = readLine(scanner);
+            if (startStr == null) return;
             starting=parseDateTime(startStr, formatter, eventView::emptyStart, eventView::startFormatError);
         }
 
         LocalDateTime alarm = null;
         eventView.inputAlarmMessage();
         while (alarm == null) {
-            String alarmStr = scanner.nextLine();
+            String alarmStr = readLine(scanner);
+            if (alarmStr == null) return;
             alarm=parseDateTime(alarmStr, formatter, eventView::emptyAlarm, eventView::alarmFormatError);
             if (alarm != null && alarm.isAfter(starting)) {
                 eventView.invalidAlarm();
@@ -199,23 +206,26 @@ public class PIMController {
         CreateContact create = new CreateContact();
 
         contactView.inputNameMessage();
-        String name = scanner.nextLine();
+        String name = readLine(scanner);
 
-        while (name.isBlank()) {
+        while (name != null && name.isBlank()) {
             contactView.emptyName();
-            name = scanner.nextLine();
+            name = readLine(scanner);
         }
+        if (name == null) return;
 
         contactView.inputPhoneMessage();
-        String phone = scanner.nextLine();
+        String phone = readLine(scanner);
 
-        while (phone.isBlank()) {
+        while (phone != null && phone.isBlank()) {
             contactView.emptyNumber();
-            phone = scanner.nextLine();
+            phone = readLine(scanner);
         }
+        if (phone == null) return;
 
         contactView.inputAddressMessage();
-        String address = scanner.nextLine();
+        String address = readLine(scanner);
+        if (address == null) return;
 
         create.createContact(manager, name, phone, address);
         contactView.success();
@@ -231,11 +241,15 @@ public class PIMController {
         }
 
         view.inputFileName();
-        String fileName = scanner.nextLine().replaceAll("\\s+", "");
+        String fileName = readLine(scanner);
+        if (fileName == null) return;
+        fileName = fileName.replaceAll("\\s+", "");
 
         while (fileName.isBlank()) {
             view.emptyFileName();
-            fileName = scanner.nextLine().replaceAll("\\s+", "");
+            fileName = readLine(scanner);
+            if (fileName == null) return;
+            fileName = fileName.replaceAll("\\s+", "");
         }
 
         if (!fileName.endsWith(".pim")) {
@@ -255,15 +269,20 @@ public class PIMController {
         Load load = new Load();
 
         view.inputFileName();
-        String fileName = scanner.nextLine().replaceAll("\\s+", "");
+        String fileName = readLine(scanner);
+        if (fileName == null) return;
+        fileName = fileName.replaceAll("\\s+", "");
 
-        while (!fileName.endsWith(".pim") || fileName.isBlank()) {
-            if (fileName.isBlank()) {
-                view.emptyFileName();
-            } else {
-                view.wrongFileType();
-            }
-            fileName = scanner.nextLine().replaceAll("\\s+", "");
+        while (fileName.isBlank()) {
+            view.emptyFileName();
+            fileName = readLine(scanner);
+            if (fileName == null) return;
+            fileName = fileName.replaceAll("\\s+", "");
+        }
+
+        //Same rule as store: a name without the extension means the file with the extension
+        if (!fileName.endsWith(".pim")) {
+            fileName = fileName + ".pim";
         }
 
         try {
@@ -277,21 +296,37 @@ public class PIMController {
     private void delete(Scanner scanner) {
         DeleteView deleteView = new DeleteView();
         Delete delete = new Delete();
-        int id;
 
         deleteView.inputMessage();
 
-        while (!scanner.hasNextInt()) {
-            deleteView.invalidInput();
-            scanner.nextLine();
+        // Keep asking until a record is deleted; an empty line returns to the main menu
+        while (true) {
+            String line = readLine(scanner);
+            if (line == null || line.isBlank()) {
+                deleteView.cancelled();
+                return;
+            }
+
+            int id;
+            try {
+                id = Integer.parseInt(line.trim());
+            } catch (NumberFormatException e) {
+                deleteView.invalidInput();
+                continue;
+            }
+
+            if (id < 0) {
+                deleteView.cancelled();
+                return;
+            }
+
+            if (delete.delete(manager, id)) {
+                deleteView.success();
+                return;
+            }
+
+            deleteView.fail();
         }
-
-        id = scanner.nextInt();
-        scanner.nextLine();
-
-        if(delete.delete(manager, id))
-            deleteView.success();
-        else deleteView.fail();
     }
 
     private void print(Scanner scanner) {
@@ -302,32 +337,40 @@ public class PIMController {
         printView.inputMessage();
         if (scanner.hasNextInt()) {
             type = scanner.nextInt();
-            scanner.nextLine();
-        } else scanner.nextLine();
+            readLine(scanner);
+        } else if (readLine(scanner) == null) return;
 
         switch (type) {
             //Specific PIR
             case 1 -> {
                 int id;
-                Record record;
 
                 printView.inputIDMessage();
 
-                while (!scanner.hasNextInt()) {
-                    printView.invalidInput();
-                    scanner.nextLine();
-                }
+                // Keep asking until a record is printed; an empty line returns to the main menu
+                while (true) {
+                    String line = readLine(scanner);
+                    if (line == null || line.isBlank()) {
+                        printView.cancelled();
+                        return;
+                    }
 
-                id = scanner.nextInt();
-                scanner.nextLine();
+                    try {
+                        id = Integer.parseInt(line.trim());
+                    } catch (NumberFormatException e) {
+                        printView.invalidInput();
+                        continue;
+                    }
 
-                record = print.searchByID(manager, id);
+                    Record record = print.searchByID(manager, id);
+                    if (record == null) {
+                        printView.fail();
+                        continue;
+                    }
 
-                if (record == null) {
-                    printView.fail();
-                } else {
                     printView.success();
                     print.print(List.of(record), formatter);
+                    return;
                 }
             }
             //All PIR
@@ -344,10 +387,6 @@ public class PIMController {
     private void search(Scanner scanner) {
         SearchView searchView = new SearchView();
         Search search = new Search();
-
-        //The function number was read with nextInt, so the rest of that line is still pending
-        if (scanner.hasNextLine())
-            scanner.nextLine();
 
         List<Token> tokens = buildQuery(scanner, searchView);
         if (tokens == null) {
@@ -399,6 +438,8 @@ public class PIMController {
                 view.menu(Token.renderQuery(tokens), options);
                 choice = readChoice(scanner, view, options.size());
             }
+            if (choice == -1)
+                return null;
 
             switch (options.get(choice - 1)) {
                 case FIELD -> {
@@ -469,6 +510,8 @@ public class PIMController {
         while (true) {
             view.fieldMenu();
             int choice = readChoice(scanner, view, fields.length + 1);
+            if (choice == -1)
+                return null;
             if (choice == 0)
                 continue;
             if (choice == fields.length + 1)
@@ -482,6 +525,8 @@ public class PIMController {
         while (true) {
             view.typeMenu();
             int choice = readChoice(scanner, view, types.length + 1);
+            if (choice == -1)
+                return null;
             if (choice == 0)
                 continue;
             if (choice == types.length + 1)
@@ -494,6 +539,8 @@ public class PIMController {
         while (true) {
             view.operatorMenu(query, field);
             int choice = readChoice(scanner, view, 4);
+            if (choice == -1)
+                return null;
             if (choice == 0)
                 continue;
             return switch (choice) {
@@ -509,6 +556,8 @@ public class PIMController {
         while (true) {
             view.logicalMenu();
             int choice = readChoice(scanner, view, 3);
+            if (choice == -1)
+                return null;
             if (choice == 0)
                 continue;
             return switch (choice) {
@@ -523,14 +572,18 @@ public class PIMController {
         view.valuePrompt(query, field);
         //Whatever is typed is the value: quote marks are ordinary characters, not delimiters.
         //An empty line is the way back, because an empty value could never match a record.
-        String value = scanner.nextLine().trim();
+        String value = readLine(scanner);
+        if (value == null) return null;
+        value = value.trim();
         return value.isEmpty() ? null : value;
     }
 
     private LocalDateTime readTime(Scanner scanner, SearchView view, Field field, String query) {
         while (true) {
             view.valuePrompt(query, field);
-            String value = scanner.nextLine().trim();
+            String value = readLine(scanner);
+            if (value == null) return null;
+            value = value.trim();
             if (value.isEmpty())
                 return null;
             try {
@@ -541,9 +594,14 @@ public class PIMController {
         }
     }
 
-    /** Reads one menu number; 0 means "the input was not one of the offered numbers". */
+    /**
+     * Reads one menu number; 0 means "the input was not one of the offered numbers",
+     * -1 means the input has ended and the search has to stop.
+     */
     private int readChoice(Scanner scanner, SearchView view, int max) {
-        String line = scanner.nextLine().trim();
+        String line = readLine(scanner);
+        if (line == null) return -1;
+        line = line.trim();
         if (!line.isEmpty()) {
             try {
                 int choice = Integer.parseInt(line);
@@ -557,23 +615,40 @@ public class PIMController {
         return 0;
     }
 
+    /**
+     * Reads one line of the session input, or returns null when the input has ended.
+     * <p>
+     * Without this check, nextLine() throws a NoSuchElementException as soon as a scripted
+     * or truncated session ("java Main &lt; input.txt") runs out of lines, and the program
+     * dies instead of going back to the main menu.
+     */
+    private String readLine(Scanner scanner) {
+        //End of input: stop the current function instead of throwing NoSuchElementException
+        return scanner.hasNextLine() ? scanner.nextLine() : null;
+    }
+
     private void modify(Scanner scanner) {
         ModifyView modifyView = new ModifyView();
         Modify modify = new Modify();
         Record record = null;
 
-        // Loop until a valid record is found or user inputs an exit condition (negative ID)
+        // Loop until a valid record is found; an empty line returns to the main menu
         while (record == null) {
             modifyView.inputMessage();
 
-            while (!scanner.hasNextInt()) {
-                modifyView.invalidInput();
-                scanner.nextLine();
-                modifyView.inputMessage();
+            String line = readLine(scanner);
+            if (line == null || line.isBlank()) {
+                modifyView.cancelled();
+                return;
             }
 
-            int id = scanner.nextInt();
-            scanner.nextLine();
+            int id;
+            try {
+                id = Integer.parseInt(line.trim());
+            } catch (NumberFormatException e) {
+                modifyView.invalidInput();
+                continue;
+            }
 
             if (id < 0) {
                 modifyView.cancelled();
@@ -593,97 +668,150 @@ public class PIMController {
 
         // Determine record type and prompt for appropriate updates
         String className = record.getClass().getSimpleName();
+        // changed: the user asked for something different; modified: that request was applied
+        boolean changed = false;
         boolean modified = false;
 
         switch (className) {
             case "Text" -> {
+                Text textRecord = (Text) record;
                 modifyView.inputDescriptionMessage();
-                String desc = scanner.nextLine();
-                if (!desc.isBlank()) {
+                String desc = readLine(scanner);
+                if (desc == null) return;
+
+                //Blank keeps the current text, and an unchanged text is not a modification
+                if (!desc.isBlank() && !desc.equals(textRecord.getText())) {
+                    changed = true;
                     modified = modify.modifyText(record, desc);
-                } else {
-                    modified = true;
                 }
             }
             case "Task" -> {
+                Task taskRecord = (Task) record;
                 modifyView.inputDescriptionMessage();
-                String desc = scanner.nextLine();
+                String desc = readLine(scanner);
+                if (desc == null) return;
 
+                boolean newDescription = !desc.isBlank() && !desc.equals(taskRecord.getDescription());
                 LocalDateTime deadline = null;
-                if (record instanceof Task taskRecord) {
-                    while (true) {
-                        modifyView.inputDeadlineMessage();
-                        String deadlineStr = scanner.nextLine();
-                        if (deadlineStr.isBlank()) {
-                            deadline = taskRecord.getDeadline();
-                            break;
-                        }
-                        try {
-                            deadline = LocalDateTime.parse(deadlineStr, formatter);
-                            break;
-                        } catch (Exception e) {
-                            modifyView.deadlineFormatError();
-                        }
+
+                while (true) {
+                    modifyView.inputDeadlineMessage();
+                    String deadlineStr = readLine(scanner);
+                    if (deadlineStr == null) return;
+                    if (deadlineStr.isBlank()) break;
+                    //A single "-" leaves the rest of the modification and returns to the main menu
+                    if (deadlineStr.trim().equals("-")) {
+                        modifyView.cancelled();
+                        return;
+                    }
+                    try {
+                        LocalDateTime parsed = LocalDateTime.parse(deadlineStr, formatter);
+                        if (!parsed.equals(taskRecord.getDeadline())) deadline = parsed;
+                        break;
+                    } catch (Exception e) {
+                        modifyView.deadlineFormatError();
                     }
                 }
-                modified = modify.modifyTask(record, desc.isBlank() ? null : desc, deadline);
+
+                if (newDescription || deadline != null) {
+                    changed = true;
+                    modified = modify.modifyTask(record, newDescription ? desc : null, deadline);
+                }
             }
             case "Event" -> {
+                Event eventRecord = (Event) record;
                 modifyView.inputDescriptionMessage();
-                String desc = scanner.nextLine();
+                String desc = readLine(scanner);
+                if (desc == null) return;
 
+                boolean newDescription = !desc.isBlank() && !desc.equals(eventRecord.getDescription());
 
                 LocalDateTime start = null;
-                LocalDateTime alarm = null;
-
-                if (record instanceof Event eventRecord) {
-                    while (true) {
-                        modifyView.inputStartMessage();
-                        String startStr = scanner.nextLine();
-                        if (startStr.isBlank()) {
-                            start = eventRecord.getStarting();
-                            break;
-                        }
-                        try {
-                            start = LocalDateTime.parse(startStr, formatter);
-                            break;
-                        } catch (Exception e) {
-                            modifyView.startingTimeFormatError();
-                        }
+                while (true) {
+                    modifyView.inputStartMessage();
+                    String startStr = readLine(scanner);
+                    if (startStr == null) return;
+                    if (startStr.isBlank()) break;
+                    //A single "-" leaves the rest of the modification and returns to the main menu
+                    if (startStr.trim().equals("-")) {
+                        modifyView.cancelled();
+                        return;
                     }
-
-                    while (true) {
-                        modifyView.inputAlarmMessage();
-                        String alarmStr = scanner.nextLine();
-                        if (alarmStr.isBlank()) {
-                            alarm = eventRecord.getAlarm();
-                            break;
-                        }
-                        try {
-                            alarm = LocalDateTime.parse(alarmStr, formatter);
-                            break;
-                        } catch (Exception e) {
-                            modifyView.alarmTimeFormatError();
-                        }
+                    try {
+                        LocalDateTime parsed = LocalDateTime.parse(startStr, formatter);
+                        if (!parsed.equals(eventRecord.getStarting())) start = parsed;
+                        break;
+                    } catch (Exception e) {
+                        modifyView.startingTimeFormatError();
                     }
                 }
 
-                modified = modify.modifyEvent(record, desc.isBlank() ? null : desc, start, alarm);
+                LocalDateTime alarm = null;
+                while (true) {
+                    modifyView.inputAlarmMessage();
+                    String alarmStr = readLine(scanner);
+                    if (alarmStr == null) return;
+                    if (alarmStr.isBlank()) break;
+                    //A single "-" leaves the rest of the modification and returns to the main menu
+                    if (alarmStr.trim().equals("-")) {
+                        modifyView.cancelled();
+                        return;
+                    }
+                    LocalDateTime parsed;
+                    try {
+                        parsed = LocalDateTime.parse(alarmStr, formatter);
+                    } catch (Exception e) {
+                        modifyView.alarmTimeFormatError();
+                        continue;
+                    }
+                    //The alarm cannot ring after the event starts, so an invalid pair is asked again
+                    LocalDateTime effectiveStart = start != null ? start : eventRecord.getStarting();
+                    if (parsed.isAfter(effectiveStart)) {
+                        modifyView.invalidAlarm();
+                        continue;
+                    }
+                    if (!parsed.equals(eventRecord.getAlarm())) alarm = parsed;
+                    break;
+                }
+
+                //Moving the starting time before the current alarm would break the same rule
+                LocalDateTime finalStart = start != null ? start : eventRecord.getStarting();
+                LocalDateTime finalAlarm = alarm != null ? alarm : eventRecord.getAlarm();
+                if (finalAlarm.isAfter(finalStart)) {
+                    modifyView.invalidAlarm();
+                    return;
+                }
+
+                if (newDescription || start != null || alarm != null) {
+                    changed = true;
+                    modified = modify.modifyEvent(record, newDescription ? desc : null, start, alarm);
+                }
             }
             case "Contact" -> {
+                Contact contactRecord = (Contact) record;
                 modifyView.inputNameMessage();
-                String name = scanner.nextLine();
+                String name = readLine(scanner);
+                if (name == null) return;
 
                 modifyView.inputPhoneMessage();
-                String phone = scanner.nextLine();
+                String phone = readLine(scanner);
+                if (phone == null) return;
 
                 modifyView.inputAddressMessage();
-                String address = scanner.nextLine();
+                String address = readLine(scanner);
+                if (address == null) return;
 
-                modified = modify.modifyContact(record,
-                        name.isBlank() ? null : name,
-                        phone.isBlank() ? null : phone,
-                        address.isBlank() ? null : address);
+                boolean newName = !name.isBlank() && !name.equals(contactRecord.getName());
+                boolean newPhone = !phone.isBlank() && !phone.equals(contactRecord.getPhone());
+                boolean newAddress = !address.isBlank() && !address.equals(contactRecord.getAddress());
+
+                if (newName || newPhone || newAddress) {
+                    changed = true;
+                    modified = modify.modifyContact(record,
+                            newName ? name : null,
+                            newPhone ? phone : null,
+                            newAddress ? address : null);
+                }
             }
             default -> {
                 modifyView.fail();
@@ -691,7 +819,9 @@ public class PIMController {
             }
         }
 
-        if (modified) {
+        if (!changed) {
+            modifyView.noChange();
+        } else if (modified) {
             modifyView.success();
         } else {
             modifyView.fail();
