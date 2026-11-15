@@ -64,6 +64,10 @@ public class ModifyView {
         System.out.println("Invalid alarm time format! Please enter a valid alarm time format.");
     }
 
+    public void invalidAlarm() {
+        System.out.println("The alarm cannot be later than the starting time! Please enter the alarm again (or leave it blank to keep the current one).");
+    }
+
     public void inputNameMessage() {
         System.out.print("Enter new name (leave blank to keep current): ");
     }
@@ -78,6 +82,10 @@ public class ModifyView {
 
     public void success() {
         System.out.println("Record successfully modified.");
+    }
+
+    public void noChange() {
+        System.out.println("No changes were made.");
     }
 
     public void fail() {

@@ -668,105 +668,127 @@ public class PIMController {
 
         // Determine record type and prompt for appropriate updates
         String className = record.getClass().getSimpleName();
+        // changed: the user asked for something different; modified: that request was applied
+        boolean changed = false;
         boolean modified = false;
 
         switch (className) {
             case "Text" -> {
+                Text textRecord = (Text) record;
                 modifyView.inputDescriptionMessage();
                 String desc = readLine(scanner);
                 if (desc == null) return;
-                if (!desc.isBlank()) {
+
+                //Blank keeps the current text, and an unchanged text is not a modification
+                if (!desc.isBlank() && !desc.equals(textRecord.getText())) {
+                    changed = true;
                     modified = modify.modifyText(record, desc);
-                } else {
-                    modified = true;
                 }
             }
             case "Task" -> {
+                Task taskRecord = (Task) record;
                 modifyView.inputDescriptionMessage();
                 String desc = readLine(scanner);
                 if (desc == null) return;
 
+                boolean newDescription = !desc.isBlank() && !desc.equals(taskRecord.getDescription());
                 LocalDateTime deadline = null;
-                if (record instanceof Task taskRecord) {
-                    while (true) {
-                        modifyView.inputDeadlineMessage();
-                        String deadlineStr = readLine(scanner);
-                        if (deadlineStr == null) return;
-                        if (deadlineStr.isBlank()) {
-                            deadline = taskRecord.getDeadline();
-                            break;
-                        }
-                        //A single "-" leaves the rest of the modification and returns to the main menu
-                        if (deadlineStr.trim().equals("-")) {
-                            modifyView.cancelled();
-                            return;
-                        }
-                        try {
-                            deadline = LocalDateTime.parse(deadlineStr, formatter);
-                            break;
-                        } catch (Exception e) {
-                            modifyView.deadlineFormatError();
-                        }
+
+                while (true) {
+                    modifyView.inputDeadlineMessage();
+                    String deadlineStr = readLine(scanner);
+                    if (deadlineStr == null) return;
+                    if (deadlineStr.isBlank()) break;
+                    //A single "-" leaves the rest of the modification and returns to the main menu
+                    if (deadlineStr.trim().equals("-")) {
+                        modifyView.cancelled();
+                        return;
+                    }
+                    try {
+                        LocalDateTime parsed = LocalDateTime.parse(deadlineStr, formatter);
+                        if (!parsed.equals(taskRecord.getDeadline())) deadline = parsed;
+                        break;
+                    } catch (Exception e) {
+                        modifyView.deadlineFormatError();
                     }
                 }
-                modified = modify.modifyTask(record, desc.isBlank() ? null : desc, deadline);
+
+                if (newDescription || deadline != null) {
+                    changed = true;
+                    modified = modify.modifyTask(record, newDescription ? desc : null, deadline);
+                }
             }
             case "Event" -> {
+                Event eventRecord = (Event) record;
                 modifyView.inputDescriptionMessage();
                 String desc = readLine(scanner);
                 if (desc == null) return;
 
+                boolean newDescription = !desc.isBlank() && !desc.equals(eventRecord.getDescription());
 
                 LocalDateTime start = null;
-                LocalDateTime alarm = null;
-
-                if (record instanceof Event eventRecord) {
-                    while (true) {
-                        modifyView.inputStartMessage();
-                        String startStr = readLine(scanner);
-                        if (startStr == null) return;
-                        if (startStr.isBlank()) {
-                            start = eventRecord.getStarting();
-                            break;
-                        }
-                        //A single "-" leaves the rest of the modification and returns to the main menu
-                        if (startStr.trim().equals("-")) {
-                            modifyView.cancelled();
-                            return;
-                        }
-                        try {
-                            start = LocalDateTime.parse(startStr, formatter);
-                            break;
-                        } catch (Exception e) {
-                            modifyView.startingTimeFormatError();
-                        }
+                while (true) {
+                    modifyView.inputStartMessage();
+                    String startStr = readLine(scanner);
+                    if (startStr == null) return;
+                    if (startStr.isBlank()) break;
+                    //A single "-" leaves the rest of the modification and returns to the main menu
+                    if (startStr.trim().equals("-")) {
+                        modifyView.cancelled();
+                        return;
                     }
-
-                    while (true) {
-                        modifyView.inputAlarmMessage();
-                        String alarmStr = readLine(scanner);
-                        if (alarmStr == null) return;
-                        if (alarmStr.isBlank()) {
-                            alarm = eventRecord.getAlarm();
-                            break;
-                        }
-                        //A single "-" leaves the rest of the modification and returns to the main menu
-                        if (alarmStr.trim().equals("-")) {
-                            modifyView.cancelled();
-                            return;
-                        }
-                        try {
-                            alarm = LocalDateTime.parse(alarmStr, formatter);
-                            break;
-                        } catch (Exception e) {
-                            modifyView.alarmTimeFormatError();
-                        }
+                    try {
+                        LocalDateTime parsed = LocalDateTime.parse(startStr, formatter);
+                        if (!parsed.equals(eventRecord.getStarting())) start = parsed;
+                        break;
+                    } catch (Exception e) {
+                        modifyView.startingTimeFormatError();
                     }
                 }
 
-                modified = modify.modifyEvent(record, desc.isBlank() ? null : desc, start, alarm);
+                LocalDateTime alarm = null;
+                while (true) {
+                    modifyView.inputAlarmMessage();
+                    String alarmStr = readLine(scanner);
+                    if (alarmStr == null) return;
+                    if (alarmStr.isBlank()) break;
+                    //A single "-" leaves the rest of the modification and returns to the main menu
+                    if (alarmStr.trim().equals("-")) {
+                        modifyView.cancelled();
+                        return;
+                    }
+                    LocalDateTime parsed;
+                    try {
+                        parsed = LocalDateTime.parse(alarmStr, formatter);
+                    } catch (Exception e) {
+                        modifyView.alarmTimeFormatError();
+                        continue;
+                    }
+                    //The alarm cannot ring after the event starts, so an invalid pair is asked again
+                    LocalDateTime effectiveStart = start != null ? start : eventRecord.getStarting();
+                    if (parsed.isAfter(effectiveStart)) {
+                        modifyView.invalidAlarm();
+                        continue;
+                    }
+                    if (!parsed.equals(eventRecord.getAlarm())) alarm = parsed;
+                    break;
+                }
+
+                //Moving the starting time before the current alarm would break the same rule
+                LocalDateTime finalStart = start != null ? start : eventRecord.getStarting();
+                LocalDateTime finalAlarm = alarm != null ? alarm : eventRecord.getAlarm();
+                if (finalAlarm.isAfter(finalStart)) {
+                    modifyView.invalidAlarm();
+                    return;
+                }
+
+                if (newDescription || start != null || alarm != null) {
+                    changed = true;
+                    modified = modify.modifyEvent(record, newDescription ? desc : null, start, alarm);
+                }
             }
             case "Contact" -> {
+                Contact contactRecord = (Contact) record;
                 modifyView.inputNameMessage();
                 String name = readLine(scanner);
                 if (name == null) return;
@@ -779,10 +801,17 @@ public class PIMController {
                 String address = readLine(scanner);
                 if (address == null) return;
 
-                modified = modify.modifyContact(record,
-                        name.isBlank() ? null : name,
-                        phone.isBlank() ? null : phone,
-                        address.isBlank() ? null : address);
+                boolean newName = !name.isBlank() && !name.equals(contactRecord.getName());
+                boolean newPhone = !phone.isBlank() && !phone.equals(contactRecord.getPhone());
+                boolean newAddress = !address.isBlank() && !address.equals(contactRecord.getAddress());
+
+                if (newName || newPhone || newAddress) {
+                    changed = true;
+                    modified = modify.modifyContact(record,
+                            newName ? name : null,
+                            newPhone ? phone : null,
+                            newAddress ? address : null);
+                }
             }
             default -> {
                 modifyView.fail();
@@ -790,7 +819,9 @@ public class PIMController {
             }
         }
 
-        if (modified) {
+        if (!changed) {
+            modifyView.noChange();
+        } else if (modified) {
             modifyView.success();
         } else {
             modifyView.fail();
