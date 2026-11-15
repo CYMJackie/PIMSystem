@@ -695,6 +695,11 @@ public class PIMController {
                             deadline = taskRecord.getDeadline();
                             break;
                         }
+                        //A single "-" leaves the rest of the modification and returns to the main menu
+                        if (deadlineStr.trim().equals("-")) {
+                            modifyView.cancelled();
+                            return;
+                        }
                         try {
                             deadline = LocalDateTime.parse(deadlineStr, formatter);
                             break;
@@ -723,6 +728,11 @@ public class PIMController {
                             start = eventRecord.getStarting();
                             break;
                         }
+                        //A single "-" leaves the rest of the modification and returns to the main menu
+                        if (startStr.trim().equals("-")) {
+                            modifyView.cancelled();
+                            return;
+                        }
                         try {
                             start = LocalDateTime.parse(startStr, formatter);
                             break;
@@ -738,6 +748,11 @@ public class PIMController {
                         if (alarmStr.isBlank()) {
                             alarm = eventRecord.getAlarm();
                             break;
+                        }
+                        //A single "-" leaves the rest of the modification and returns to the main menu
+                        if (alarmStr.trim().equals("-")) {
+                            modifyView.cancelled();
+                            return;
                         }
                         try {
                             alarm = LocalDateTime.parse(alarmStr, formatter);
