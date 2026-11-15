@@ -41,7 +41,7 @@ public class ModifyView {
     }
 
     public void inputDeadlineMessage() {
-        System.out.print("Enter new deadline (yyyy-MM-dd HH:mm:ss, leave blank to keep current, - to cancel): ");
+        System.out.print("Enter new deadline (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
     }
 
     public void deadlineFormatError() {
@@ -49,7 +49,7 @@ public class ModifyView {
     }
 
     public void inputStartMessage() {
-        System.out.print("Enter new starting time (yyyy-MM-dd HH:mm:ss, leave blank to keep current, - to cancel): ");
+        System.out.print("Enter new starting time (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
     }
 
     public void startingTimeFormatError() {
@@ -57,7 +57,7 @@ public class ModifyView {
     }
 
     public void inputAlarmMessage() {
-        System.out.print("Enter new alarm time (yyyy-MM-dd HH:mm:ss, leave blank to keep current, - to cancel): ");
+        System.out.print("Enter new alarm time (yyyy-MM-dd HH:mm:ss, leave blank to keep current): ");
     }
 
     public void alarmTimeFormatError() {
