@@ -28,7 +28,7 @@ public class CreateTaskView {
 
     public void deadlineFormatError() {
         System.out.println("============================================================================================");
-        System.out.println("The format of deadline should be yyyy-MM-dd HH:mm:ss ! Please enter again (Press enter to confirm): ");
+        System.out.println("The format of deadline should be yyyy-MM-dd HH:mm:ss! Please enter again (Press enter to confirm): ");
         System.out.println("============================================================================================");
     }
 

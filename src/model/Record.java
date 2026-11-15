@@ -16,4 +16,5 @@ public abstract class Record {
     public String getType() {
         return type;
     }
+
 }

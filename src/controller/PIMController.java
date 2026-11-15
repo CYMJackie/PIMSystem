@@ -1,25 +1,13 @@
 package controller;
 
 import model.PIRManager;
-import model.command.CreateContact;
-import model.command.CreateTask;
-import model.command.CreateEvent;
-import model.command.CreateText;
-import model.command.Search;
-import model.search.Criterion;
-import model.search.Field;
-import model.search.Operator;
-import model.search.SearchResult;
-import model.search.Token;
-import model.search.TokenType;
-import model.search.Type;
+import model.command.*;
+import model.record.*;
+import model.Record;
+import model.search.*;
 import view.PIMView;
-import view.command.CreateContactView;
-import view.command.CreateEventView;
-import view.command.CreateTextView;
-import view.command.CreateView;
-import view.command.CreateTaskView;
-import view.command.SearchView;
+import view.command.*;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -31,6 +19,7 @@ import java.util.Scanner;
 public class PIMController {
     private final PIMView view;
     private final PIRManager manager;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").withResolverStyle(ResolverStyle.STRICT);
 
     public PIMController(PIRManager manager, PIMView view) {
         this.manager = manager;
@@ -38,7 +27,7 @@ public class PIMController {
     }
 
     public void initialize() {
-        int function, type = 0;
+        int function;
         view.initialMessage();
 
         //One scanner for the whole session.
@@ -53,11 +42,13 @@ public class PIMController {
             if (!scanner.hasNext()) {
                 //End of input: leave instead of reporting an error forever
                 view.exitMessage();
-                break loop;
+                break;
             }
 
-            if (scanner.hasNextInt())
+            if (scanner.hasNextInt()) {
                 function = scanner.nextInt();
+                scanner.nextLine();
+            }
             else {
                 view.function_ErrorMessage();
                 scanner.nextLine(); //Discard the invalid token, or it would be read again forever
@@ -66,19 +57,19 @@ public class PIMController {
 
             switch (function) {
                 //Create record
-                case 1 -> create(scanner, type);
+                case 1 -> create(scanner);
                 //Modify record
-                case 2 -> {}
+                case 2 -> modify(scanner);
                 //Delete record
-                case 3 -> {}
+                case 3 -> delete(scanner);
                 //Search record
                 case 4 -> search(scanner);
                 //Print record
-                case 5 -> {}
+                case 5 -> print(scanner);
                 //Store record
-                case 6 -> {}
+                case 6 -> save(scanner);
                 //Load record
-                case 7 -> {}
+                case 7 -> load(scanner);
                 //Exit
                 case 8 -> {
                     view.exitMessage();
@@ -89,14 +80,18 @@ public class PIMController {
         }
     }
 
-    private void create(Scanner scanner, int type) {
+    private void create(Scanner scanner) {
         CreateView createView = new CreateView();
+        int type = 0;
 
         createView.inputMessage();
 
         //Error handling of whether "type" is integer
-        if (scanner.hasNextInt())
+        if (scanner.hasNextInt()) {
             type = scanner.nextInt();
+            scanner.nextLine();
+        }
+        else scanner.nextLine();
 
         switch (type) {
             //Create Text
@@ -115,9 +110,6 @@ public class PIMController {
         CreateTextView textView = new CreateTextView();
         CreateText create = new CreateText();
 
-        if (scanner.hasNextLine())
-            scanner.nextLine();
-
         textView.inputMessage();
         String description = scanner.nextLine();
 
@@ -134,18 +126,12 @@ public class PIMController {
         CreateTaskView taskView = new CreateTaskView();
         CreateTask create = new CreateTask();
 
-        if (scanner.hasNextLine())
-            scanner.nextLine();
-
         taskView.inputDescriptionMessage();
         String description = scanner.nextLine();
         while (description.isBlank()) {
             taskView.emptyDescription();
             description = scanner.nextLine();
         }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
-                .withResolverStyle(ResolverStyle.STRICT);
 
         LocalDateTime parsedDeadline = null;
         taskView.inputDeadlineMessage();
@@ -163,11 +149,6 @@ public class PIMController {
     private void createEvent(Scanner scanner) {
         CreateEventView eventView = new CreateEventView();
         CreateEvent create = new CreateEvent();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
-                .withResolverStyle(ResolverStyle.STRICT);
-
-        if (scanner.hasNextLine())
-            scanner.nextLine();
 
         eventView.inputDescMessage();
         String description = scanner.nextLine();
@@ -217,9 +198,6 @@ public class PIMController {
         CreateContactView contactView = new CreateContactView();
         CreateContact create = new CreateContact();
 
-        if (scanner.hasNextLine())
-            scanner.nextLine();
-
         contactView.inputNameMessage();
         String name = scanner.nextLine();
 
@@ -241,6 +219,126 @@ public class PIMController {
 
         create.createContact(manager, name, phone, address);
         contactView.success();
+    }
+
+    private void save(Scanner scanner) {
+        SaveView view = new SaveView();
+        Save save = new Save();
+
+        if (manager.getRecords().isEmpty()) {
+            view.emptyRecord();
+            return;
+        }
+
+        view.inputFileName();
+        String fileName = scanner.nextLine().replaceAll("\\s+", "");
+
+        while (fileName.isBlank()) {
+            view.emptyFileName();
+            fileName = scanner.nextLine().replaceAll("\\s+", "");
+        }
+
+        if (!fileName.endsWith(".pim")) {
+            fileName = fileName + ".pim";
+        }
+
+        try {
+            save.exe(manager, fileName);
+            view.successSave();
+        } catch (Exception e){
+            view.failSave(e.getMessage());
+        }
+    }
+
+    private void load(Scanner scanner) {
+        LoadView view = new LoadView();
+        Load load = new Load();
+
+        view.inputFileName();
+        String fileName = scanner.nextLine().replaceAll("\\s+", "");
+
+        while (!fileName.endsWith(".pim") || fileName.isBlank()) {
+            if (fileName.isBlank()) {
+                view.emptyFileName();
+            } else {
+                view.wrongFileType();
+            }
+            fileName = scanner.nextLine().replaceAll("\\s+", "");
+        }
+
+        try {
+            load.exe(manager, fileName);
+            view.successLoad();
+        } catch (Exception e){
+            view.failLoad(e.getMessage());
+        }
+    }
+
+    private void delete(Scanner scanner) {
+        DeleteView deleteView = new DeleteView();
+        Delete delete = new Delete();
+        int id;
+
+        deleteView.inputMessage();
+
+        while (!scanner.hasNextInt()) {
+            deleteView.invalidInput();
+            scanner.nextLine();
+        }
+
+        id = scanner.nextInt();
+        scanner.nextLine();
+
+        if(delete.delete(manager, id))
+            deleteView.success();
+        else deleteView.fail();
+    }
+
+    private void print(Scanner scanner) {
+        PrintView printView = new PrintView();
+        Print print = new Print();
+        int type = 0;
+
+        printView.inputMessage();
+        if (scanner.hasNextInt()) {
+            type = scanner.nextInt();
+            scanner.nextLine();
+        } else scanner.nextLine();
+
+        switch (type) {
+            //Specific PIR
+            case 1 -> {
+                int id;
+                Record record;
+
+                printView.inputIDMessage();
+
+                while (!scanner.hasNextInt()) {
+                    printView.invalidInput();
+                    scanner.nextLine();
+                }
+
+                id = scanner.nextInt();
+                scanner.nextLine();
+
+                record = print.searchByID(manager, id);
+
+                if (record == null) {
+                    printView.fail();
+                } else {
+                    printView.success();
+                    print.print(List.of(record), formatter);
+                }
+            }
+            //All PIR
+            case 2 -> {
+                if (!manager.getRecords().isEmpty()) {
+                    printView.success();
+                    print.print(manager.getRecords(), formatter);
+                } else printView.emptyMessage();
+            }
+            default -> view.function_ErrorMessage();
+        }
     }
 
     private void search(Scanner scanner) {
@@ -274,7 +372,7 @@ public class PIMController {
         int openGroups = 0;
 
         while (true) {
-            TokenType last = tokens.isEmpty() ? null : tokens.get(tokens.size() - 1).getType();
+            TokenType last = tokens.isEmpty() ? null : tokens.getLast().getType();
             boolean operandExpected = last == null
                     || last == TokenType.LEFT_PAREN
                     || last == TokenType.AND
@@ -324,7 +422,7 @@ public class PIMController {
                 }
                 case REMOVE_LAST -> {
                     //Keep the open group count in step: dropping a ')' re-opens a group, dropping a '(' closes it
-                    TokenType removed = tokens.remove(tokens.size() - 1).getType();
+                    TokenType removed = tokens.removeLast().getType();
                     if (removed == TokenType.RIGHT_PAREN)
                         openGroups++;
                     else if (removed == TokenType.LEFT_PAREN)
@@ -457,5 +555,146 @@ public class PIMController {
         }
         view.invalidInputMessage();
         return 0;
+    }
+
+    private void modify(Scanner scanner) {
+        ModifyView modifyView = new ModifyView();
+        Modify modify = new Modify();
+        Record record = null;
+
+        // Loop until a valid record is found or user inputs an exit condition (negative ID)
+        while (record == null) {
+            modifyView.inputMessage();
+
+            while (!scanner.hasNextInt()) {
+                modifyView.invalidInput();
+                scanner.nextLine();
+                modifyView.inputMessage();
+            }
+
+            int id = scanner.nextInt();
+            scanner.nextLine();
+
+            if (id < 0) {
+                modifyView.cancelled();
+                return;
+            }
+
+            record = modify.searchByID(manager, id);
+
+            if (record == null) {
+                modifyView.recordNotFound();
+                modifyView.tryAgain();
+            }
+        }
+
+        // PRINT THE PIR to be modified
+        modifyView.displayRecordDetails(record, formatter);
+
+        // Determine record type and prompt for appropriate updates
+        String className = record.getClass().getSimpleName();
+        boolean modified = false;
+
+        switch (className) {
+            case "Text" -> {
+                modifyView.inputDescriptionMessage();
+                String desc = scanner.nextLine();
+                if (!desc.isBlank()) {
+                    modified = modify.modifyText(record, desc);
+                } else {
+                    modified = true;
+                }
+            }
+            case "Task" -> {
+                modifyView.inputDescriptionMessage();
+                String desc = scanner.nextLine();
+
+                LocalDateTime deadline = null;
+                if (record instanceof Task taskRecord) {
+                    while (true) {
+                        modifyView.inputDeadlineMessage();
+                        String deadlineStr = scanner.nextLine();
+                        if (deadlineStr.isBlank()) {
+                            deadline = taskRecord.getDeadline();
+                            break;
+                        }
+                        try {
+                            deadline = LocalDateTime.parse(deadlineStr, formatter);
+                            break;
+                        } catch (Exception e) {
+                            modifyView.deadlineFormatError();
+                        }
+                    }
+                }
+                modified = modify.modifyTask(record, desc.isBlank() ? null : desc, deadline);
+            }
+            case "Event" -> {
+                modifyView.inputDescriptionMessage();
+                String desc = scanner.nextLine();
+
+
+                LocalDateTime start = null;
+                LocalDateTime alarm = null;
+
+                if (record instanceof Event eventRecord) {
+                    while (true) {
+                        modifyView.inputStartMessage();
+                        String startStr = scanner.nextLine();
+                        if (startStr.isBlank()) {
+                            start = eventRecord.getStarting();
+                            break;
+                        }
+                        try {
+                            start = LocalDateTime.parse(startStr, formatter);
+                            break;
+                        } catch (Exception e) {
+                            modifyView.startingTimeFormatError();
+                        }
+                    }
+
+                    while (true) {
+                        modifyView.inputAlarmMessage();
+                        String alarmStr = scanner.nextLine();
+                        if (alarmStr.isBlank()) {
+                            alarm = eventRecord.getAlarm();
+                            break;
+                        }
+                        try {
+                            alarm = LocalDateTime.parse(alarmStr, formatter);
+                            break;
+                        } catch (Exception e) {
+                            modifyView.alarmTimeFormatError();
+                        }
+                    }
+                }
+
+                modified = modify.modifyEvent(record, desc.isBlank() ? null : desc, start, alarm);
+            }
+            case "Contact" -> {
+                modifyView.inputNameMessage();
+                String name = scanner.nextLine();
+
+                modifyView.inputPhoneMessage();
+                String phone = scanner.nextLine();
+
+                modifyView.inputAddressMessage();
+                String address = scanner.nextLine();
+
+                modified = modify.modifyContact(record,
+                        name.isBlank() ? null : name,
+                        phone.isBlank() ? null : phone,
+                        address.isBlank() ? null : address);
+            }
+            default -> {
+                modifyView.fail();
+                return;
+            }
+        }
+
+        if (modified) {
+            modifyView.success();
+        } else {
+            modifyView.fail();
+        }
     }
 }
