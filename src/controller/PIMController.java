@@ -273,15 +273,16 @@ public class PIMController {
         if (fileName == null) return;
         fileName = fileName.replaceAll("\\s+", "");
 
-        while (!fileName.endsWith(".pim") || fileName.isBlank()) {
-            if (fileName.isBlank()) {
-                view.emptyFileName();
-            } else {
-                view.wrongFileType();
-            }
+        while (fileName.isBlank()) {
+            view.emptyFileName();
             fileName = readLine(scanner);
             if (fileName == null) return;
             fileName = fileName.replaceAll("\\s+", "");
+        }
+
+        //Same rule as store: a name without the extension means the file with the extension
+        if (!fileName.endsWith(".pim")) {
+            fileName = fileName + ".pim";
         }
 
         try {

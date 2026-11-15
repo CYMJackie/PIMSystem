@@ -24,7 +24,7 @@ public class Load {
         for (String line : lines) {
             if (line.isBlank()) continue;
 
-            String[] parts = line.split("\\|", -1);
+            String[] parts = splitFields(line);
             String type = parts[0];
 
             int id = Integer.parseInt(parts[1]);
@@ -67,5 +67,33 @@ public class Load {
         }
 
         manager.setCurrentID(maxID + 1);
+    }
+
+    /**
+     * Splits one stored line into its fields, honouring the escaping written by {@link Save}.
+     * <p>
+     * A plain split("\\|") treats every separator as a boundary, so a note or description containing "|"
+     * was cut into extra fields and the whole line shifted. Here a backslash takes the next character
+     * literally, which is how "|" and "\" inside a value survive save and load.
+     */
+    private static String[] splitFields(String line) {
+        List<String> fields = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (c == '\\' && i + 1 < line.length()) {
+                current.append(line.charAt(++i));
+            } else if (c == '|') {
+                fields.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+
+        fields.add(current.toString());
+        return fields.toArray(new String[0]);
     }
 }

@@ -26,10 +26,4 @@ public class LoadView {
         System.out.println("============================================================================================");
     }
 
-    public void wrongFileType() {
-        System.out.println("============================================================================================");
-        System.out.println("File selected must end with \".pim\" extension! Please select other file (Press enter to confirm): ");
-        System.out.println("============================================================================================");
-    }
-
 }
