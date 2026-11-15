@@ -19,6 +19,12 @@ public class DeleteView {
         System.out.println("============================================================================================");
     }
 
+    public void cancelled() {
+        System.out.println("============================================================================================");
+        System.out.println("Deletion cancelled.");
+        System.out.println("============================================================================================");
+    }
+
     public void fail() {
         System.out.println("============================================================================================");
         System.out.println("The record doesn't exist! Please input relative ID (Press enter to confirm): ");

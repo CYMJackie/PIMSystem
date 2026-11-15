@@ -281,17 +281,28 @@ public class PIMController {
 
         deleteView.inputMessage();
 
-        while (!scanner.hasNextInt()) {
-            deleteView.invalidInput();
+        // Keep asking until a record is deleted; a negative ID cancels the function
+        while (true) {
+            while (!scanner.hasNextInt()) {
+                deleteView.invalidInput();
+                scanner.nextLine();
+            }
+
+            id = scanner.nextInt();
             scanner.nextLine();
+
+            if (id < 0) {
+                deleteView.cancelled();
+                return;
+            }
+
+            if (delete.delete(manager, id)) {
+                deleteView.success();
+                return;
+            }
+
+            deleteView.fail();
         }
-
-        id = scanner.nextInt();
-        scanner.nextLine();
-
-        if(delete.delete(manager, id))
-            deleteView.success();
-        else deleteView.fail();
     }
 
     private void print(Scanner scanner) {
@@ -344,10 +355,6 @@ public class PIMController {
     private void search(Scanner scanner) {
         SearchView searchView = new SearchView();
         Search search = new Search();
-
-        //The function number was read with nextInt, so the rest of that line is still pending
-        if (scanner.hasNextLine())
-            scanner.nextLine();
 
         List<Token> tokens = buildQuery(scanner, searchView);
         if (tokens == null) {
