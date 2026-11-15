@@ -701,11 +701,7 @@ public class PIMController {
                     String deadlineStr = readLine(scanner);
                     if (deadlineStr == null) return;
                     if (deadlineStr.isBlank()) break;
-                    //A single "-" leaves the rest of the modification and returns to the main menu
-                    if (deadlineStr.trim().equals("-")) {
-                        modifyView.cancelled();
-                        return;
-                    }
+
                     try {
                         LocalDateTime parsed = LocalDateTime.parse(deadlineStr, formatter);
                         if (!parsed.equals(taskRecord.getDeadline())) deadline = parsed;
@@ -734,11 +730,7 @@ public class PIMController {
                     String startStr = readLine(scanner);
                     if (startStr == null) return;
                     if (startStr.isBlank()) break;
-                    //A single "-" leaves the rest of the modification and returns to the main menu
-                    if (startStr.trim().equals("-")) {
-                        modifyView.cancelled();
-                        return;
-                    }
+
                     try {
                         LocalDateTime parsed = LocalDateTime.parse(startStr, formatter);
                         if (!parsed.equals(eventRecord.getStarting())) start = parsed;
@@ -754,11 +746,7 @@ public class PIMController {
                     String alarmStr = readLine(scanner);
                     if (alarmStr == null) return;
                     if (alarmStr.isBlank()) break;
-                    //A single "-" leaves the rest of the modification and returns to the main menu
-                    if (alarmStr.trim().equals("-")) {
-                        modifyView.cancelled();
-                        return;
-                    }
+
                     LocalDateTime parsed;
                     try {
                         parsed = LocalDateTime.parse(alarmStr, formatter);
