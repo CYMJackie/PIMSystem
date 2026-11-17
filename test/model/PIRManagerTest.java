@@ -62,7 +62,7 @@ public class PIRManagerTest {
         createText.createText(manager, "Note");
         Record record = manager.getRecords().get(0);
 
-        assertEquals("Text", ((Text) record).getText());
+        assertEquals("Note", ((Text) record).getText());
     }
 
     //FR-DR-04, FR-03: Task should contain a description and deadline
@@ -83,6 +83,7 @@ public class PIRManagerTest {
         CreateEvent createEvent = new CreateEvent();
         LocalDateTime start = LocalDateTime.of(2026, 11, 17, 12,00,00);
         LocalDateTime alarm = LocalDateTime.of(2026, 11, 17, 12,00,00);
+        createEvent.createEvent(manager, "Event", start, alarm);
         Record record = manager.getRecords().get(0);
 
         assertEquals("Event", ((Event)record).getDescription());
@@ -101,7 +102,7 @@ public class PIRManagerTest {
         assertEquals("Name1", ((Contact)manager.getRecords().get(0)).getName());
         assertEquals("12345678", ((Contact) manager.getRecords().get(0)).getPhone());
         assertEquals("Addr", ((Contact) manager.getRecords().get(0)).getAddress());
-        assertEquals("Addr", ((Contact) manager.getRecords().get(1)).getAddress());
+        assertEquals(null, ((Contact) manager.getRecords().get(1)).getAddress());
     }
 
     //FR-06, FR-07: Creation rejection
