@@ -55,6 +55,49 @@ public class ModifyTest {
         assertEquals("Note", ((Text) record).getText(), "Original text must be preserved");
     }
 
+    @Test
+    public void testModifyEvent(){
+        LocalDateTime oldAlarm = LocalDateTime.of(2026, 11, 17, 12,00,00);
+        LocalDateTime oldStart = LocalDateTime.of(2026, 11, 17, 12,00,00);
+        LocalDateTime newAlarm = LocalDateTime.of(2026, 11, 20, 10, 30, 00);
+        LocalDateTime newStart = LocalDateTime.of(2026, 11, 20, 12, 30, 00);
+        new CreateEvent().createEvent(manager, "Event", oldAlarm, oldStart);
+        Record record = manager.getRecords().get(0);
+        Modify modify = new Modify();
+
+        boolean result = modify.modifyEvent(record, "New Event", newStart, newAlarm);
+        assertTrue(result, "Modify event should be modified");
+        assertEquals("New Event", ((Event) record).getDescription(), "The description should be changed.");
+        assertEquals(newAlarm, ((Event) record).getAlarm(), "The alarm should be changed.");
+        assertEquals(newStart, ((Event)record).getStarting(), "The start time should be changed.");
+
+        boolean result2 = modify.modifyEvent(record, null, null, null);
+        assertFalse(result2, "Modify event should not be modified");
+        assertEquals("New Event", ((Event) record).getDescription(), "The description should not be changed.");
+        assertEquals(newAlarm, ((Event) record).getAlarm(), "The alarm should be not changed.");
+        assertEquals(newStart, ((Event)record).getStarting(), "The start time should be not changed.");
+    }
+
+    @Test
+    public void ModifyContact(){
+        new CreateContact().createContact(manager, "Name", "12345678", "Address");
+        Record record = manager.getRecords().get(0);
+        Modify modify = new Modify();
+        boolean result = modify.modifyContact(record, "New Name", "87654321", "New Address");
+        assertTrue(result, "Modify contact should be modified");
+        assertEquals("New Name", ((Contact) record).getName(), "The name should be changed.");
+        assertEquals("87654321", ((Contact) record).getPhone(), "The address should be changed.");
+        assertEquals("New Address", ((Contact) record).getAddress(), "The address should be changed.");
+
+        boolean result2 = modify.modifyContact(record, null, null, null);
+        assertFalse(result2, "Modify contact should not be modified");
+        assertEquals("New Name", ((Contact) record).getName(), "The name should be changed.");
+        assertEquals("87654321", ((Contact) record).getPhone(), "The address should be changed.");
+        assertEquals("New Address", ((Contact) record).getAddress(), "The address should be changed.");
+
+
+    }
+
     //FR-15: Modified PIR is fully functional (Searchable, Printable, Savable)
     @Test
     public void testModifyIsFullyFunctional(@TempDir Path tempDir) throws Exception{

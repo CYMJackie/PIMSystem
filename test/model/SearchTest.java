@@ -158,5 +158,29 @@ public class SearchTest {
             assertEquals(originalRecords.get(i).getId(), manager.getRecords().get(i).getId());
         }
     }
+
+    //test QueryHighlighter and SearchValidator
+    @Test
+    public void testHighlighter(){
+        List<Token> tokens = new ArrayList<>();
+        tokens.add(Token.criterion(Criterion.forType(Type.TEXT)));
+        tokens.add(Token.and());
+        tokens.add(Token.criterion(Criterion.forType(Type.TASK)));
+
+        SearchResult result = searchCommand.search(manager, tokens);
+        assertEquals(0, result.getRecords().size(), "Should find exactly 0 Text record");
+    }
+
+    //test QueryHighlighter and SearchValidator
+    @Test
+    public void testHighlighter2(){
+        List<Token> tokens = new ArrayList<>();
+        tokens.add(Token.criterion(Criterion.forType(Type.CONTACT)));
+        tokens.add(Token.and());
+        tokens.add(Token.criterion(Criterion.forText(Field.NAME, "a")));
+
+        SearchResult result = searchCommand.search(manager, tokens);
+        assertEquals(1, result.getRecords().size(), "Should find exactly 1 Text record");
+    }
 }
 

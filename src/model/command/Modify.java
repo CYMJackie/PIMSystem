@@ -24,7 +24,7 @@ public class Modify {
     }
 
     public boolean modifyTask(Record record, String newDescription, LocalDateTime newDeadline) {
-        if (record == null) return false;
+        if (record == null || (newDescription == null && newDeadline == null)) return false;
         Task task = (Task) record;
         if (newDescription != null && !newDescription.isBlank()) {
             task.setDescription(newDescription);
@@ -36,7 +36,7 @@ public class Modify {
     }
 
     public boolean modifyEvent(Record record, String newDescription, LocalDateTime newStarting, LocalDateTime newAlarm) {
-        if (record == null) return false;
+        if (record == null || (newDescription == null && newStarting == null && newAlarm == null)) return false;
         Event event = (Event) record;
         if (newDescription != null && !newDescription.isBlank()) {
             event.setDescription(newDescription);
@@ -51,7 +51,7 @@ public class Modify {
     }
 
     public boolean modifyContact(Record record, String newName, String newPhone, String newAddress) {
-        if (record == null) return false;
+        if (record == null || (newName == null && newPhone == null && newAddress == null)) return false;
         Contact contact = (Contact) record;
         if (newName != null && !newName.isBlank()) {
             contact.setName(newName);
