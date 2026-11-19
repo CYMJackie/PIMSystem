@@ -1,0 +1,250 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SearchValidator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">model.search</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchValidator (model.search)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchValidator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58.3%
+  </span>
+  <span class="absValue">
+    (14/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73.3%
+  </span>
+  <span class="absValue">
+    (22/30)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SearchValidator$LogicalWarning</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58.3%
+  </span>
+  <span class="absValue">
+    (14/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.4%
+  </span>
+  <span class="absValue">
+    (29/37)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package model.search;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.EnumSet;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Finds a part of the query that can never be true, for example
+&nbsp; * {@code type = Contact &amp;&amp; type = Task}.
+&nbsp; *
+&nbsp; * This is a warning, not a rejection: FR-22 still wants the empty result list, the
+&nbsp; * warning only explains why the list is empty. The check is deliberately
+&nbsp; * conservative - a condition is only reported when all four record types are
+&nbsp; * ruled out - so a satisfiable query can never be rejected.
+&nbsp; */
+&nbsp;public final class SearchValidator {
+&nbsp;
+&nbsp;    /** The first impossible part of the query, plus the tokens that should be highlighted. */
+&nbsp;    public static final class LogicalWarning {
+&nbsp;
+&nbsp;        private final int firstToken;
+&nbsp;        private final int lastToken;
+&nbsp;        private final String explanation;
+&nbsp;
+<b class="fc">&nbsp;        private LogicalWarning(int firstToken, int lastToken, String explanation) {</b>
+<b class="fc">&nbsp;            this.firstToken = firstToken;</b>
+<b class="fc">&nbsp;            this.lastToken = lastToken;</b>
+<b class="fc">&nbsp;            this.explanation = explanation;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public int getFirstToken() {
+<b class="fc">&nbsp;            return firstToken;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public int getLastToken() {
+<b class="fc">&nbsp;            return lastToken;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        public String getExplanation() {
+<b class="fc">&nbsp;            return explanation;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private SearchValidator() {
+&nbsp;    }
+&nbsp;
+&nbsp;    /** Returns the first contradiction in the order the user typed it, or null when there is none. */
+&nbsp;    public static LogicalWarning find(SearchExpression expression) {
+<b class="fc">&nbsp;        for (AndExpression and : collectAndExpressions(expression)) {</b>
+<b class="fc">&nbsp;            TypeProfile left = and.getLeft().profile();</b>
+<b class="fc">&nbsp;            TypeProfile right = and.getRight().profile();</b>
+<b class="fc">&nbsp;            if (left.and(right).isImpossible()) {</b>
+<b class="fc">&nbsp;                return new LogicalWarning(and.getOperatorToken(), and.getRight().getLastToken(),</b>
+<b class="fc">&nbsp;                        explain(and.getLeft(), and.getRight()));</b>
+&nbsp;            }
+&nbsp;        }
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** Says why the two sides of an AND cannot both be true, in the words that fit the case. */
+&nbsp;    private static String explain(SearchExpression left, SearchExpression right) {
+<b class="pc">&nbsp;        if (left instanceof LeafExpression leftLeaf &amp;&amp; right instanceof LeafExpression rightLeaf</b>
+<b class="pc">&nbsp;                &amp;&amp; leftLeaf.getCriterion().isTypeTest() &amp;&amp; rightLeaf.getCriterion().isTypeTest())</b>
+<b class="fc">&nbsp;            return TypeProfile.describeConflict(left.profile(), right.profile());</b>
+&nbsp;
+<b class="nc">&nbsp;        EnumSet&lt;Type&gt; leftTypes = left.profile().possibleTypes();</b>
+<b class="nc">&nbsp;        EnumSet&lt;Type&gt; rightTypes = right.profile().possibleTypes();</b>
+<b class="nc">&nbsp;        if (leftTypes.size() == 1 &amp;&amp; rightTypes.size() == 1 &amp;&amp; !leftTypes.equals(rightTypes)) {</b>
+<b class="nc">&nbsp;            Type leftType = leftTypes.iterator().next();</b>
+<b class="nc">&nbsp;            Type rightType = rightTypes.iterator().next();</b>
+<b class="nc">&nbsp;            return &quot;The first condition needs a &quot; + leftType.getLabel() + &quot; record and the second needs a &quot;</b>
+<b class="nc">&nbsp;                    + rightType.getLabel() + &quot; record, so no single record can satisfy both.&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;The two conditions can never be satisfied by the same kind of record.&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Every AND, in reading order. Walking the left side first means the inner AND of
+&nbsp;     * {@code a &amp;&amp; b &amp;&amp; c} is checked before the outer one, so the reported operator is
+&nbsp;     * the one that actually made the query impossible.
+&nbsp;     */
+&nbsp;    private static List&lt;AndExpression&gt; collectAndExpressions(SearchExpression expression) {
+<b class="fc">&nbsp;        List&lt;AndExpression&gt; found = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        collect(expression, found);</b>
+<b class="fc">&nbsp;        return found;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static void collect(SearchExpression expression, List&lt;AndExpression&gt; found) {
+<b class="fc">&nbsp;        if (expression instanceof AndExpression and) {</b>
+<b class="fc">&nbsp;            collect(and.getLeft(), found);</b>
+<b class="fc">&nbsp;            found.add(and);</b>
+<b class="fc">&nbsp;            collect(and.getRight(), found);</b>
+<b class="fc">&nbsp;        } else if (expression instanceof OrExpression or) {</b>
+<b class="fc">&nbsp;            collect(or.getLeft(), found);</b>
+<b class="fc">&nbsp;            collect(or.getRight(), found);</b>
+<b class="fc">&nbsp;        } else if (expression instanceof NotExpression not) {</b>
+<b class="fc">&nbsp;            collect(not.getChild(), found);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-11-18 14:57</div>
+</div>
+</body>
+</html>

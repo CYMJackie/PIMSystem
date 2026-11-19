@@ -1,0 +1,173 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SearchResult</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">model.search</a>
+</div>
+
+<h1>Coverage Summary for Class: SearchResult (model.search)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SearchResult</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    28.6%
+  </span>
+  <span class="absValue">
+    (2/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58.3%
+  </span>
+  <span class="absValue">
+    (7/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package model.search;
+&nbsp;
+&nbsp;import java.util.Collections;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import model.Record;
+&nbsp;
+&nbsp;/**
+&nbsp; * Everything the view needs to show one search: the query, the matching records,
+&nbsp; * the fields the query mentioned, and the optional logical warning.
+&nbsp; * The model never prints anything itself (NFR-03), the view only formats these values.
+&nbsp; */
+&nbsp;public final class SearchResult {
+&nbsp;
+&nbsp;    private final String query;
+&nbsp;    private final List&lt;Record&gt; records;
+&nbsp;    private final List&lt;Field&gt; fields;
+&nbsp;    private final Map&lt;Field, List&lt;String&gt;&gt; terms;
+&nbsp;    private final String warning;
+&nbsp;
+&nbsp;    public SearchResult(String query, List&lt;Record&gt; records, List&lt;Field&gt; fields,
+<b class="fc">&nbsp;                        Map&lt;Field, List&lt;String&gt;&gt; terms, String warning) {</b>
+<b class="fc">&nbsp;        this.query = query;</b>
+<b class="fc">&nbsp;        this.records = List.copyOf(records);</b>
+<b class="fc">&nbsp;        this.fields = List.copyOf(fields);</b>
+<b class="fc">&nbsp;        this.terms = Collections.unmodifiableMap(terms);</b>
+<b class="fc">&nbsp;        this.warning = warning;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getQuery() {
+<b class="nc">&nbsp;        return query;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** FR-21 / FR-23: a copy of the matching records, sorted by identifier, never the manager&#39;s own list. */
+&nbsp;    public List&lt;Record&gt; getRecords() {
+<b class="fc">&nbsp;        return records;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** The fields the query referred to, in the order they were entered. */
+&nbsp;    public List&lt;Field&gt; getFields() {
+<b class="nc">&nbsp;        return fields;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** The text the user searched for in one field, used to pick the words shown around the match. */
+&nbsp;    public List&lt;String&gt; getTerms(Field field) {
+<b class="nc">&nbsp;        return terms.getOrDefault(field, List.of());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public boolean hasWarning() {
+<b class="nc">&nbsp;        return warning != null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getWarning() {
+<b class="nc">&nbsp;        return warning;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-11-18 14:57</div>
+</div>
+</body>
+</html>

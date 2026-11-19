@@ -1,0 +1,169 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > NotExpression</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">model.search</a>
+</div>
+
+<h1>Coverage Summary for Class: NotExpression (model.search)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">NotExpression</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57.1%
+  </span>
+  <span class="absValue">
+    (4/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package model.search;
+&nbsp;
+&nbsp;import java.util.LinkedHashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;import model.Record;
+&nbsp;
+&nbsp;/** FR-19 &quot;!&quot;: every record that the covered expression does not match. */
+&nbsp;public final class NotExpression extends SearchExpression {
+&nbsp;
+&nbsp;    private final SearchExpression child;
+&nbsp;    private final int notTokenIndex;
+&nbsp;
+<b class="fc">&nbsp;    public NotExpression(SearchExpression child, int notTokenIndex) {</b>
+<b class="fc">&nbsp;        this.child = child;</b>
+<b class="fc">&nbsp;        this.notTokenIndex = notTokenIndex;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public SearchExpression getChild() {
+<b class="fc">&nbsp;        return child;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Set&lt;Integer&gt; evaluate(List&lt;Record&gt; records) {
+<b class="fc">&nbsp;        Set&lt;Integer&gt; covered = child.evaluate(records);</b>
+<b class="fc">&nbsp;        Set&lt;Integer&gt; ids = new LinkedHashSet&lt;&gt;();</b>
+<b class="fc">&nbsp;        for (Record record : records)</b>
+<b class="fc">&nbsp;            if (!covered.contains(record.getId()))</b>
+<b class="fc">&nbsp;                ids.add(record.getId());</b>
+<b class="fc">&nbsp;        return ids;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public TypeProfile profile() {
+<b class="nc">&nbsp;        return child.profile().not();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void collectCriteria(List&lt;Criterion&gt; criteria) {
+<b class="fc">&nbsp;        child.collectCriteria(criteria);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int getFirstToken() {
+<b class="nc">&nbsp;        return notTokenIndex;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public int getLastToken() {
+<b class="nc">&nbsp;        return child.getLastToken();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-11-18 14:57</div>
+</div>
+</body>
+</html>

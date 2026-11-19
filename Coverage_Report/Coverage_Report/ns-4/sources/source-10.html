@@ -1,0 +1,278 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TypeProfile</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">model.search</a>
+</div>
+
+<h1>Coverage Summary for Class: TypeProfile (model.search)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TypeProfile</td>
+<td class="coverageStat">
+  <span class="percent">
+    84.6%
+  </span>
+  <span class="absValue">
+    (11/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70.2%
+  </span>
+  <span class="absValue">
+    (33/47)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73.2%
+  </span>
+  <span class="absValue">
+    (41/56)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">TypeProfile$Status</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    86.7%
+  </span>
+  <span class="absValue">
+    (13/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70.2%
+  </span>
+  <span class="absValue">
+    (33/47)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (45/60)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package model.search;
+&nbsp;
+&nbsp;import java.util.EnumMap;
+&nbsp;import java.util.EnumSet;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * For each of the four PIR types, records whether a condition can be satisfied
+&nbsp; * by that type: always, never, or only for some records.
+&nbsp; *
+&nbsp; * Used to prove that a condition can never be true at all: when all four types
+&nbsp; * come out ALWAYS_FALSE, no record can ever satisfy it.
+&nbsp; */
+&nbsp;public final class TypeProfile {
+&nbsp;
+<b class="fc">&nbsp;    public enum Status {</b>
+<b class="fc">&nbsp;        ALWAYS_TRUE,</b>
+<b class="fc">&nbsp;        ALWAYS_FALSE,</b>
+<b class="fc">&nbsp;        MAYBE</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private final Map&lt;Type, Status&gt; statuses;
+&nbsp;
+<b class="fc">&nbsp;    private TypeProfile(Map&lt;Type, Status&gt; statuses) {</b>
+<b class="fc">&nbsp;        this.statuses = statuses;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** A condition that is always true for the given type and never true for the other three. */
+&nbsp;    public static TypeProfile ofType(Type type) {
+<b class="fc">&nbsp;        Map&lt;Type, Status&gt; map = new EnumMap&lt;&gt;(Type.class);</b>
+<b class="fc">&nbsp;        for (Type each : Type.values())</b>
+<b class="fc">&nbsp;            map.put(each, each == type ? Status.ALWAYS_TRUE : Status.ALWAYS_FALSE);</b>
+<b class="fc">&nbsp;        return new TypeProfile(map);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** A condition that can only ever be true for the given types (a field of those types). */
+&nbsp;    public static TypeProfile maybeFor(EnumSet&lt;Type&gt; types) {
+<b class="fc">&nbsp;        Map&lt;Type, Status&gt; map = new EnumMap&lt;&gt;(Type.class);</b>
+<b class="fc">&nbsp;        for (Type each : Type.values())</b>
+<b class="fc">&nbsp;            map.put(each, types.contains(each) ? Status.MAYBE : Status.ALWAYS_FALSE);</b>
+<b class="fc">&nbsp;        return new TypeProfile(map);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Status statusOf(Type type) {
+<b class="fc">&nbsp;        return statuses.get(type);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public TypeProfile and(TypeProfile other) {
+<b class="fc">&nbsp;        Map&lt;Type, Status&gt; map = new EnumMap&lt;&gt;(Type.class);</b>
+<b class="fc">&nbsp;        for (Type each : Type.values())</b>
+<b class="fc">&nbsp;            map.put(each, and(statuses.get(each), other.statusOf(each)));</b>
+<b class="fc">&nbsp;        return new TypeProfile(map);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public TypeProfile or(TypeProfile other) {
+<b class="fc">&nbsp;        Map&lt;Type, Status&gt; map = new EnumMap&lt;&gt;(Type.class);</b>
+<b class="fc">&nbsp;        for (Type each : Type.values())</b>
+<b class="fc">&nbsp;            map.put(each, or(statuses.get(each), other.statusOf(each)));</b>
+<b class="fc">&nbsp;        return new TypeProfile(map);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public TypeProfile not() {
+<b class="nc">&nbsp;        Map&lt;Type, Status&gt; map = new EnumMap&lt;&gt;(Type.class);</b>
+<b class="nc">&nbsp;        for (Type each : Type.values())</b>
+<b class="nc">&nbsp;            map.put(each, not(statuses.get(each)));</b>
+<b class="nc">&nbsp;        return new TypeProfile(map);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** True when no record of any type can satisfy this condition. */
+&nbsp;    public boolean isImpossible() {
+<b class="fc">&nbsp;        for (Type each : Type.values())</b>
+<b class="fc">&nbsp;            if (statuses.get(each) != Status.ALWAYS_FALSE)</b>
+<b class="fc">&nbsp;                return false;</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /** The types that are not ruled out by this condition. */
+&nbsp;    public EnumSet&lt;Type&gt; possibleTypes() {
+<b class="fc">&nbsp;        EnumSet&lt;Type&gt; possible = EnumSet.noneOf(Type.class);</b>
+<b class="fc">&nbsp;        for (Type each : Type.values())</b>
+<b class="fc">&nbsp;            if (statuses.get(each) != Status.ALWAYS_FALSE)</b>
+<b class="fc">&nbsp;                possible.add(each);</b>
+<b class="fc">&nbsp;        return possible;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Explains why the two sides of an AND can never hold together.
+&nbsp;     * Only used once isImpossible() has already been checked on the combination.
+&nbsp;     */
+&nbsp;    public static String describeConflict(TypeProfile left, TypeProfile right) {
+<b class="fc">&nbsp;        EnumSet&lt;Type&gt; leftTypes = left.possibleTypes();</b>
+<b class="fc">&nbsp;        EnumSet&lt;Type&gt; rightTypes = right.possibleTypes();</b>
+&nbsp;
+<b class="pc">&nbsp;        if (leftTypes.size() == 1 &amp;&amp; rightTypes.size() == 1 &amp;&amp; !leftTypes.equals(rightTypes)) {</b>
+<b class="fc">&nbsp;            return &quot;A record cannot be both &quot; + leftTypes.iterator().next().getLabel()</b>
+<b class="fc">&nbsp;                    + &quot; and &quot; + rightTypes.iterator().next().getLabel() + &quot;.&quot;;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;The two conditions can never be satisfied by the same kind of record.&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Status and(Status a, Status b) {
+<b class="fc">&nbsp;        if (a == Status.ALWAYS_FALSE || b == Status.ALWAYS_FALSE)</b>
+<b class="fc">&nbsp;            return Status.ALWAYS_FALSE;</b>
+<b class="pc">&nbsp;        if (a == Status.ALWAYS_TRUE)</b>
+<b class="fc">&nbsp;            return b;</b>
+<b class="nc">&nbsp;        if (b == Status.ALWAYS_TRUE)</b>
+<b class="nc">&nbsp;            return a;</b>
+<b class="nc">&nbsp;        return Status.MAYBE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Status or(Status a, Status b) {
+<b class="fc">&nbsp;        if (a == Status.ALWAYS_TRUE || b == Status.ALWAYS_TRUE)</b>
+<b class="fc">&nbsp;            return Status.ALWAYS_TRUE;</b>
+<b class="pc">&nbsp;        if (a == Status.ALWAYS_FALSE)</b>
+<b class="fc">&nbsp;            return b;</b>
+<b class="nc">&nbsp;        if (b == Status.ALWAYS_FALSE)</b>
+<b class="nc">&nbsp;            return a;</b>
+<b class="nc">&nbsp;        return Status.MAYBE;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private static Status not(Status status) {
+<b class="nc">&nbsp;        return switch (status) {</b>
+<b class="nc">&nbsp;            case ALWAYS_TRUE -&gt; Status.ALWAYS_FALSE;</b>
+<b class="nc">&nbsp;            case ALWAYS_FALSE -&gt; Status.ALWAYS_TRUE;</b>
+<b class="nc">&nbsp;            case MAYBE -&gt; Status.MAYBE;</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-11-18 14:57</div>
+</div>
+</body>
+</html>
